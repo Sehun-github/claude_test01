@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>서승아 | 자기소개서</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+    :root {
+      --primary: #5c2d6e;
+      --accent: #a855c8;
+      --accent2: #e07b39;
+      --accent-light: #f5eafa;
+      --choco: #6b3a2a;
+      --choco-light: #fdf0e8;
+      --text: #2c2c2c;
+      --muted: #6b7280;
+      --border: #e8dff0;
+      --bg: #faf7fc;
+      --white: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* ── 사이드바 ── */
+    .sidebar {
+      width: 230px;
+      min-width: 230px;
+      background: linear-gradient(180deg, var(--primary) 0%, #3d1a50 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 0;
+      box-shadow: 4px 0 24px rgba(92,45,110,0.25);
+      z-index: 10;
+    }
+    .sidebar-logo {
+      text-align: center;
+      padding: 0 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 16px;
+    }
+    .sidebar-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      border: 3px solid rgba(255,255,255,0.25);
+      box-shadow: 0 4px 20px rgba(168,85,200,0.4);
+    }
+    .sidebar-name { color: #fff; font-size: 18px; font-weight: 700; }
+    .sidebar-birth { color: rgba(255,255,255,0.5); font-size: 11.5px; margin-top: 4px; }
+    .sidebar-emoji { font-size: 18px; margin-top: 6px; }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 24px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 13.5px; font-weight: 500;
+      border: none; background: none;
+      width: 100%; text-align: left;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.07); }
+    .nav-btn.active {
+      color: #fff;
+      background: rgba(168,85,200,0.25);
+      border-left-color: var(--accent);
+    }
+    .nav-btn .nav-icon { font-size: 17px; width: 22px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+    .sidebar-footer p { color: rgba(255,255,255,0.3); font-size: 11px; }
+    .choco-bar {
+      margin-top: 10px;
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+
+    /* ── 메인 ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 36px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .topbar-sub { font-size: 12px; color: var(--muted); }
+
+    .top-right { display: flex; align-items: center; gap: 14px; }
+    .page-dots { display: flex; gap: 6px; align-items: center; }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border); transition: all 0.2s; cursor: pointer;
+    }
+    .dot.active { background: var(--accent); width: 20px; border-radius: 4px; }
+
+    .top-arrow {
+      width: 34px; height: 34px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--white);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.15s; color: var(--primary);
+    }
+    .top-arrow:hover:not(:disabled) { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .top-arrow:disabled { opacity: 0.3; cursor: default; }
+
+    .print-btn {
+      padding: 8px 16px; background: var(--accent); color: #fff;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s; font-family: inherit;
+    }
+    .print-btn:hover { background: var(--primary); }
+
+    .progress-bar { height: 3px; background: var(--border); flex-shrink: 0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.3s ease; }
+
+    /* ── 컨텐츠 ── */
+    .content-wrap { flex: 1; overflow: hidden; position: relative; }
+    .page {
+      position: absolute; inset: 0;
+      padding: 32px 40px;
+      overflow-y: auto;
+      opacity: 0; transform: translateX(40px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+    .page.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .page.exit-left { opacity: 0; transform: translateX(-40px); }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--white);
+      border-radius: 16px; padding: 28px 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(92,45,110,0.06);
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-size: 11.5px; font-weight: 700; color: var(--accent);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 2px solid var(--accent-light);
+    }
+
+    /* ── PAGE 0: 소개 ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #7b2d9e 60%, var(--accent2) 100%);
+      border-radius: 18px; padding: 44px 44px;
+      color: #fff; margin-bottom: 18px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '🍫';
+      position: absolute; right: 40px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 100px; opacity: 0.15;
+    }
+    .hero h1 { font-size: 36px; font-weight: 700; }
+    .hero .birth { color: rgba(255,255,255,0.65); font-size: 14px; margin-top: 6px; }
+    .hero .tagline {
+      margin-top: 18px;
+      font-size: 16px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+      line-height: 1.7;
+    }
+    .hero-badges { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .hero-badges span {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff; padding: 5px 14px;
+      border-radius: 20px; font-size: 13px;
+    }
+
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .info-item {
+      background: var(--bg); border-radius: 10px;
+      padding: 14px 18px; border: 1px solid var(--border);
+    }
+    .info-item .lbl { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .info-item .val { font-size: 14px; font-weight: 600; color: var(--primary); margin-top: 3px; }
+
+    .intro-text { font-size: 14.5px; line-height: 1.95; }
+    .intro-text p + p { margin-top: 14px; }
+    .intro-text strong { color: var(--primary); }
+    .intro-text .choco-highlight {
+      background: var(--choco-light);
+      border-left: 3px solid var(--accent2);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--choco);
+    }
+
+    /* ── PAGE 1: 성격 & 가치관 ── */
+    .personality-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .p-card {
+      border-radius: 14px; padding: 22px;
+      border: 1px solid var(--border);
+      transition: all 0.25s; cursor: default;
+      position: relative; overflow: hidden;
+    }
+    .p-card::before {
+      content: attr(data-emoji);
+      position: absolute; right: 16px; bottom: 12px;
+      font-size: 42px; opacity: 0.12;
+    }
+    .p-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(92,45,110,0.12); border-color: var(--accent); }
+    .p-card .pc-icon { font-size: 28px; margin-bottom: 10px; }
+    .p-card h3 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+    .p-card p { font-size: 13px; color: var(--muted); line-height: 1.75; }
+    .p-card .pc-keyword {
+      margin-top: 10px; display: inline-block;
+      background: var(--accent-light); color: var(--accent);
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* 초코 섹션 */
+    .choco-section {
+      background: linear-gradient(135deg, #3d1a0a, #6b3a2a);
+      border-radius: 16px; padding: 28px 32px;
+      color: #fff; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .choco-big { font-size: 64px; flex-shrink: 0; }
+    .choco-section h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .choco-section p { font-size: 13.5px; color: rgba(255,255,255,0.8); line-height: 1.8; }
+    .choco-types { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .choco-types span {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    /* ── PAGE 2: 하루 일과 ── */
+    .meal-timeline { position: relative; padding-left: 32px; }
+    .meal-timeline::before {
+      content: ''; position: absolute;
+      left: 10px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--border);
+    }
+    .mt-item { position: relative; margin-bottom: 24px; }
+    .mt-dot {
+      position: absolute; left: -25px; top: 4px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 10px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--white);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .mt-item .mt-time { font-size: 11.5px; color: var(--accent); font-weight: 700; margin-bottom: 3px; }
+    .mt-item h3 { font-size: 14.5px; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
+    .mt-item p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .meal-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--choco-light); border: 1px solid #f0d0b0;
+      color: var(--choco); font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px; margin-top: 6px;
+    }
+
+    .energy-card {
+      background: linear-gradient(135deg, #fff9f5, #fdf0e8);
+      border: 1px solid #f0d0b0;
+      border-radius: 14px; padding: 22px 24px;
+    }
+    .energy-card h3 { font-size: 15px; font-weight: 700; color: var(--choco); margin-bottom: 14px; }
+    .energy-bar-list { display: flex; flex-direction: column; gap: 12px; }
+    .energy-item .eh {
+      display: flex; justify-content: space-between;
+      font-size: 12.5px; margin-bottom: 5px;
+    }
+    .energy-item .en { font-weight: 600; color: var(--choco); }
+    .energy-item .ep { color: var(--muted); font-size: 11.5px; }
+    .e-track { height: 8px; background: #f0d0b0; border-radius: 10px; overflow: hidden; }
+    .e-fill {
+      height: 100%; border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent2), #f5a623);
+      width: 0; transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── PAGE 3: 강점 ── */
+    .strength-list { display: flex; flex-direction: column; gap: 14px; }
+    .str-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 20px; border-radius: 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .str-item:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(168,85,200,0.1); }
+    .str-num {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      color: #fff; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; flex-shrink: 0;
+    }
+    .str-item h4 { font-size: 14.5px; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
+    .str-item p { font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .str-quote {
+      margin-top: 8px; font-size: 12.5px; font-style: italic;
+      color: var(--accent); border-left: 2px solid var(--accent);
+      padding-left: 10px;
+    }
+
+    /* ── PAGE 4: 마무리 ── */
+    .closing-hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #7b2d9e 50%, var(--accent2) 100%);
+      border-radius: 18px; padding: 52px 40px;
+      color: #fff; text-align: center; margin-bottom: 18px;
+      position: relative; overflow: hidden;
+    }
+    .closing-hero::before {
+      content: '🍫☀️🍴';
+      position: absolute; bottom: 16px; right: 24px;
+      font-size: 28px; opacity: 0.3; letter-spacing: 4px;
+    }
+    .closing-hero p { font-size: 15.5px; line-height: 2.1; color: rgba(255,255,255,0.88); }
+    .closing-hero .sign { margin-top: 28px; font-size: 24px; font-weight: 700; }
+    .closing-hero .date { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 6px; }
+
+    .keyword-wall {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    }
+    .kw {
+      padding: 8px 18px; border-radius: 24px;
+      font-size: 13.5px; font-weight: 600;
+      border: 1.5px solid var(--border);
+      color: var(--primary); background: var(--white);
+      transition: all 0.2s; cursor: default;
+    }
+    .kw:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .kw.choco { background: var(--choco-light); border-color: #f0c090; color: var(--choco); }
+    .kw.choco:hover { background: var(--choco); color: #fff; }
+
+    @media print {
+      body { overflow: visible; height: auto; display: block; }
+      .sidebar, .topbar, .progress-bar { display: none; }
+      .content-wrap { overflow: visible; }
+      .page { position: static; opacity: 1 !important; transform: none !important; pointer-events: all; display: block; }
+      .page:not(.active) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-avatar">서</div>
+      <div class="sidebar-name">서승아</div>
+      <div class="sidebar-birth">1995. 08. 27</div>
+      <div class="sidebar-emoji">🍫 ☀️ 🍴</div>
+    </div>
+
+    <button class="nav-btn active" onclick="goTo(0)">
+      <span class="nav-icon">👋</span> 나를 소개합니다
+    </button>
+    <button class="nav-btn" onclick="goTo(1)">
+      <span class="nav-icon">🌟</span> 성격 & 가치관
+    </button>
+    <button class="nav-btn" onclick="goTo(2)">
+      <span class="nav-icon">🍴</span> 하루 일과 & 에너지
+    </button>
+    <button class="nav-btn" onclick="goTo(3)">
+      <span class="nav-icon">💪</span> 나의 강점
+    </button>
+    <button class="nav-btn" onclick="goTo(4)">
+      <span class="nav-icon">💌</span> 마무리 인사
+    </button>
+
+    <div class="sidebar-footer">
+      <p>서승아 · 1995년생</p>
+      <div class="choco-bar">🍫🍫🍫</div>
+    </div>
+  </aside>
+
+  <!-- 메인 -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">나를 소개합니다</div>
+        <div class="topbar-sub">자기소개서 · <span id="page-num">1 / 5</span></div>
+      </div>
+      <div class="top-right">
+        <div class="page-dots" id="dots"></div>
+        <button class="print-btn" onclick="window.print()">🖨 인쇄</button>
+        <button class="top-arrow" id="btn-prev" onclick="prevPage()" disabled>&#8592;</button>
+        <button class="top-arrow" id="btn-next" onclick="nextPage()">&#8594;</button>
+      </div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:20%"></div>
+    </div>
+
+    <div class="content-wrap">
+
+      <!-- PAGE 0: 소개 -->
+      <div class="page active" id="page-0">
+        <div class="hero">
+          <h1>서 승 아 🍫</h1>
+          <div class="birth">1995년 8월 27일 · 매사 열심히 사는 사람</div>
+          <div class="tagline">
+            초코 한 조각, 든든한 세끼,<br>그리고 오늘도 최선을 다하는 하루.
+          </div>
+          <div class="hero-badges">
+            <span>🔥 매사 열심히</span>
+            <span>🍫 초코 러버</span>
+            <span>🍴 삼시세끼 필수</span>
+            <span>☀️ 긍정 에너지</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">기본 정보</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="lbl">이름</div><div class="val">서승아</div></div>
+            <div class="info-item"><div class="lbl">생년월일</div><div class="val">1995년 8월 27일</div></div>
+            <div class="info-item"><div class="lbl">좌우명</div><div class="val">매사 열심히</div></div>
+            <div class="info-item"><div class="lbl">에너지원</div><div class="val">🍫 초코 + 삼시세끼</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">자기소개</div>
+          <div class="intro-text">
+            <p>
+              안녕하세요, <strong>서승아</strong>입니다. 1995년 8월 27일에 태어나 지금까지 하루하루를 최선을 다해 살아왔습니다.
+              저를 한 문장으로 표현한다면, <strong>"초코를 먹으며 삼시세끼를 든든히 챙겨먹는 열심히 사는 사람"</strong>이라고 할 수 있습니다.
+            </p>
+            <p>
+              저는 어떤 일이든 성실하게 임하는 것을 삶의 원칙으로 삼고 있습니다.
+              작은 일이라도 대충 넘기지 않고, 끝까지 책임감 있게 완수하려는 태도가 저의 가장 큰 장점이라고 생각합니다.
+              그 원동력에는 항상 <strong>규칙적인 식사</strong>와 <strong>초콜릿</strong>이 함께하고 있습니다.
+            </p>
+            <div class="choco-highlight">
+              🍫 초콜릿은 단순한 간식이 아닙니다. 집중이 필요할 때, 지칠 것 같을 때, 기분 전환이 필요할 때 — 항상 곁에서 저를 응원해주는 든든한 동반자입니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 1: 성격 & 가치관 -->
+      <div class="page" id="page-1">
+
+        <div class="choco-section">
+          <div class="choco-big">🍫</div>
+          <div>
+            <h3>초코와 함께하는 인생철학</h3>
+            <p>달콤하지만 때로는 쌉싸름한 초콜릿처럼, 삶도 달고 쓴 순간이 공존합니다. 저는 그 모든 순간을 있는 그대로 받아들이며 앞으로 나아가는 사람입니다. 힘든 순간엔 초코 한 조각으로 기운을 내고, 좋은 순간엔 초코 한 조각으로 더 달콤하게 기억합니다.</p>
+            <div class="choco-types">
+              <span>🍫 다크초콜릿</span>
+              <span>🍬 밀크초콜릿</span>
+              <span>☕ 핫초코</span>
+              <span>🍩 초코 디저트</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">성격 & 가치관</div>
+          <div class="personality-grid">
+            <div class="p-card" data-emoji="🔥">
+              <div class="pc-icon">🔥</div>
+              <h3>열정적인 성실함</h3>
+              <p>맡은 일은 끝까지 해내는 성격입니다. 크든 작든 어떤 과제도 대충 넘기는 법이 없으며, 마감 전날까지 꼼꼼하게 확인하는 습관이 있습니다.</p>
+              <span class="pc-keyword"># 성실 # 책임감</span>
+            </div>
+            <div class="p-card" data-emoji="☀️">
+              <div class="pc-icon">☀️</div>
+              <h3>긍정적인 에너지</h3>
+              <p>어떤 상황에서도 밝은 면을 보려고 노력합니다. 어려운 일이 생겨도 "일단 먹고 생각하자"는 마인드로 침착하게 대처합니다.</p>
+              <span class="pc-keyword"># 긍정 # 유머</span>
+            </div>
+            <div class="p-card" data-emoji="🍴">
+              <div class="pc-icon">🍴</div>
+              <h3>규칙적인 생활</h3>
+              <p>삼시세끼를 빠짐없이 챙겨먹는 것에서 알 수 있듯, 규칙적인 생활 리듬을 중시합니다. 규칙성이 곧 생산성으로 이어진다고 믿습니다.</p>
+              <span class="pc-keyword"># 규칙성 # 자기관리</span>
+            </div>
+            <div class="p-card" data-emoji="🤝">
+              <div class="pc-icon">🤝</div>
+              <h3>따뜻한 배려심</h3>
+              <p>주변 사람들을 챙기는 것을 좋아합니다. 초콜릿을 나눠먹듯 좋은 것은 함께 나누고, 힘든 일도 같이 해결하는 것이 제 삶의 방식입니다.</p>
+              <span class="pc-keyword"># 배려 # 협력</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 2: 하루 일과 & 에너지 -->
+      <div class="page" id="page-2">
+        <div class="card">
+          <div class="card-title">🍴 서승아의 하루 일과 — 삼시세끼 중심</div>
+          <div class="meal-timeline">
+            <div class="mt-item">
+              <div class="mt-dot">🌅</div>
+              <div class="mt-time">AM 7:00 – 8:00</div>
+              <h3>아침 — 하루의 시작은 든든하게</h3>
+              <p>아침을 거르면 하루가 흔들린다고 생각합니다. 따뜻한 국과 밥으로 하루를 시작하며 오늘도 열심히 살겠다는 다짐을 합니다.</p>
+              <span class="meal-badge">🍚 아침 필수 · 절대 건너뜀 없음</span>
+            </div>
+            <div class="mt-item">
+              <div class="mt-dot">☀️</div>
+              <div class="mt-time">AM 10:00</div>
+              <h3>오전 집중 타임 + 초코 충전</h3>
+              <p>오전 집중력이 가장 높은 시간대입니다. 중요한 업무와 공부를 이 시간에 배치하고, 다크초콜릿 한 조각으로 집중력을 끌어올립니다.</p>
+              <span class="meal-badge">🍫 다크초콜릿 = 집중력 부스터</span>
+            </div>
+            <div class="mt-item">
+              <div class="mt-dot">🍱</div>
+              <div class="mt-time">PM 12:00 – 13:00</div>
+              <h3>점심 — 하루의 중심</h3>
+              <p>점심은 하루의 에너지 재충전 타임입니다. 맛있는 점심 한 끼를 위해 오전을 더 열심히 달리는 편입니다. 디저트로 초코 음료까지 곁들이면 완벽.</p>
+              <span class="meal-badge">🍽️ 점심 = 하루 최고의 보상</span>
+            </div>
+            <div class="mt-item">
+              <div class="mt-dot">🌆</div>
+              <div class="mt-time">PM 3:00</div>
+              <h3>오후 슬럼프 탈출 — 초코 타임</h3>
+              <p>오후 3시, 모든 사람이 겪는 그 슬럼프. 저의 해결책은 단 하나, 초콜릿입니다. 밀크초콜릿 한 조각이면 다시 엔진이 켜집니다.</p>
+              <span class="meal-badge">🍫 슬럼프 해결사 = 초코</span>
+            </div>
+            <div class="mt-item">
+              <div class="mt-dot">🌙</div>
+              <div class="mt-time">PM 6:00 – 7:00</div>
+              <h3>저녁 — 하루를 마무리하는 의식</h3>
+              <p>저녁은 단순한 식사가 아니라 하루를 정리하는 의식입니다. 오늘 하루 열심히 살았다는 자축과 함께 든든한 저녁으로 내일을 준비합니다.</p>
+              <span class="meal-badge">🌙 저녁 = 오늘의 완성</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="energy-card">
+          <h3>🔋 서승아의 에너지 원천 분석</h3>
+          <div class="energy-bar-list" id="energy-bars">
+            <div class="energy-item">
+              <div class="eh"><span class="en">아침밥 에너지</span><span class="ep">95%</span></div>
+              <div class="e-track"><div class="e-fill" data-pct="95"></div></div>
+            </div>
+            <div class="energy-item">
+              <div class="eh"><span class="en">점심밥 만족도</span><span class="ep">98%</span></div>
+              <div class="e-track"><div class="e-fill" data-pct="98"></div></div>
+            </div>
+            <div class="energy-item">
+              <div class="eh"><span class="en">초코 충전 효과</span><span class="ep">100%</span></div>
+              <div class="e-track"><div class="e-fill" data-pct="100"></div></div>
+            </div>
+            <div class="energy-item">
+              <div class="eh"><span class="en">저녁밥 포만감</span><span class="ep">92%</span></div>
+              <div class="e-track"><div class="e-fill" data-pct="92"></div></div>
+            </div>
+            <div class="energy-item">
+              <div class="eh"><span class="en">내일도 열심히 할 의지</span><span class="ep">99%</span></div>
+              <div class="e-track"><div class="e-fill" data-pct="99"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 3: 강점 -->
+      <div class="page" id="page-3">
+        <div class="card">
+          <div class="card-title">나의 강점</div>
+          <div class="strength-list">
+            <div class="str-item">
+              <div class="str-num">1</div>
+              <div>
+                <h4>끝까지 해내는 실행력</h4>
+                <p>시작한 일은 반드시 끝냅니다. 처음에는 작은 일처럼 보여도 끝까지 책임지고 완수하는 태도가 몸에 배어 있습니다. 힘든 순간에는 초콜릿 한 조각으로 다시 마음을 다잡고 앞으로 나아갑니다.</p>
+                <div class="str-quote">"오늘 못 하면 내일도 못 한다 — 그래서 오늘 한다."</div>
+              </div>
+            </div>
+            <div class="str-item">
+              <div class="str-num">2</div>
+              <div>
+                <h4>꾸준함이 만들어내는 신뢰</h4>
+                <p>매일 아침을 거르지 않듯, 맡은 역할에서도 단 하루도 대충 보내는 법이 없습니다. 화려한 성과보다 꾸준한 성실함으로 주변의 신뢰를 얻는 것이 저의 방식입니다.</p>
+                <div class="str-quote">"삼시세끼처럼 — 빠짐없이, 든든하게, 매일."</div>
+              </div>
+            </div>
+            <div class="str-item">
+              <div class="str-num">3</div>
+              <div>
+                <h4>긍정 에너지로 분위기를 이끄는 힘</h4>
+                <p>어떤 상황에서도 유머와 밝음을 잃지 않습니다. 팀이 지치거나 힘들 때 분위기를 환기시키고, 초콜릿을 나눠주듯 에너지를 나눠주는 역할을 자연스럽게 맡게 됩니다.</p>
+                <div class="str-quote">"초코 나눔 = 에너지 나눔 = 팀워크."</div>
+              </div>
+            </div>
+            <div class="str-item">
+              <div class="str-num">4</div>
+              <div>
+                <h4>자기관리와 생활 리듬의 안정감</h4>
+                <p>삼시세끼를 빠짐없이 챙기는 작은 습관이 보여주듯, 자신을 돌보는 것에 소홀하지 않습니다. 건강한 몸과 마음이 지속적인 퍼포먼스의 기반이라는 것을 알고 실천합니다.</p>
+                <div class="str-quote">"잘 먹어야 잘 할 수 있다 — 이건 진심이다."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 4: 마무리 -->
+      <div class="page" id="page-4">
+        <div class="closing-hero">
+          <p>
+            매일 아침을 든든하게 시작하고,<br>
+            지칠 때마다 초콜릿 한 조각으로 다시 일어서며,<br>
+            저녁 한 끼로 하루를 완성하는 것처럼 —<br><br>
+            저 <strong>서승아</strong>는 그렇게 살아왔고, 앞으로도 그렇게 살아갈 것입니다.<br><br>
+            <strong>매사 열심히.</strong> 그것이 저의 전부입니다.
+          </p>
+          <div class="sign">서 승 아 🍫</div>
+          <div class="date">1995. 08. 27 — 2026. 03. 16</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">서승아를 표현하는 키워드</div>
+          <div class="keyword-wall">
+            <span class="kw">🔥 열정</span>
+            <span class="kw">💪 성실함</span>
+            <span class="kw choco">🍫 초콜릿</span>
+            <span class="kw">🍴 삼시세끼</span>
+            <span class="kw">☀️ 긍정</span>
+            <span class="kw">🤝 배려</span>
+            <span class="kw">📋 책임감</span>
+            <span class="kw choco">🍬 달콤함</span>
+            <span class="kw">🌱 꾸준함</span>
+            <span class="kw">💡 성장</span>
+            <span class="kw choco">☕ 핫초코</span>
+            <span class="kw">🎯 집중력</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-wrap -->
+  </div><!-- /main -->
+
+  <script>
+    const PAGES = ['나를 소개합니다', '성격 & 가치관', '하루 일과 & 에너지', '나의 강점', '마무리 인사'];
+    let current = 0, animating = false;
+
+    // 점 생성
+    const dotsEl = document.getElementById('dots');
+    PAGES.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsEl.appendChild(d);
+    });
+
+    function goTo(idx) {
+      if (animating || idx === current || idx < 0 || idx >= PAGES.length) return;
+      animating = true;
+      const from = document.getElementById('page-' + current);
+      const to   = document.getElementById('page-' + idx);
+      from.classList.remove('active');
+      from.classList.add('exit-left');
+      to.style.transform = 'translateX(40px)';
+      to.style.opacity = '0';
+      setTimeout(() => {
+        from.classList.remove('exit-left');
+        to.classList.add('active');
+        to.style.transform = '';
+        to.style.opacity = '';
+        current = idx;
+        updateUI();
+        animating = false;
+        if (idx === 2) animateEnergy();
+      }, 50);
+    }
+
+    function updateUI() {
+      document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === current));
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+      document.getElementById('topbar-title').textContent = PAGES[current];
+      document.getElementById('page-num').textContent = (current + 1) + ' / ' + PAGES.length;
+      document.getElementById('progress-fill').style.width = ((current + 1) / PAGES.length * 100) + '%';
+      document.getElementById('btn-prev').disabled = current === 0;
+      document.getElementById('btn-next').disabled = current === PAGES.length - 1;
+    }
+
+    function prevPage() { goTo(current - 1); }
+    function nextPage() { goTo(current + 1); }
+
+    function animateEnergy() {
+      document.querySelectorAll('.e-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextPage();
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevPage();
+    });
+  </script>
+</body>
+</html>

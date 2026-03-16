@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대한제당 - 순수한 달콤함</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── 라이트 테마 ─────────────────────────── */
+    :root {
+      --primary:       #1A6FBF;
+      --primary-dark:  #1050A0;
+      --primary-light: #DBEAFE;
+      --accent:        #3B82F6;
+      --accent2:       #06B6D4;
+      --text:          #0F1F38;
+      --muted:         #5B728A;
+      --bg:            #F0F7FF;
+      --bg2:           #E6F0FB;
+      --white:         #ffffff;
+      --border:        #C2D9F0;
+      --nav-bg:        rgba(255,255,255,0.94);
+      --card-bg:       #ffffff;
+      --radius:        16px;
+      --shadow:        0 4px 24px rgba(26,111,191,0.10);
+      --shadow-lg:     0 12px 40px rgba(26,111,191,0.18);
+
+      --hero-grad:   linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 60%, #E0F2FE 100%);
+      --cta-grad:    linear-gradient(135deg, #1050A0 0%, #1A6FBF 50%, #2563EB 100%);
+      --sugar-grad:  radial-gradient(circle at 30% 30%, #BFDBFE, #93C5FD 35%, #3B82F6 70%, #1A6FBF);
+      --sugar-shadow:rgba(26,111,191,0.35);
+    }
+
+    /* ── 다크 테마 ───────────────────────────── */
+    [data-theme="dark"] {
+      --primary:       #3B82F6;
+      --primary-dark:  #2563EB;
+      --primary-light: #1E3A5F;
+      --accent:        #60A5FA;
+      --accent2:       #22D3EE;
+      --text:          #E2EAF4;
+      --muted:         #8DA4BE;
+      --bg:            #0D1B2E;
+      --bg2:           #112240;
+      --white:         #0D1B2E;
+      --border:        #1E3A5F;
+      --nav-bg:        rgba(13,27,46,0.92);
+      --card-bg:       #162A45;
+      --shadow:        0 4px 24px rgba(0,0,0,0.3);
+      --shadow-lg:     0 12px 40px rgba(0,0,0,0.4);
+
+      --hero-grad:   linear-gradient(135deg, #0A1628 0%, #0D1B2E 50%, #091525 100%);
+      --cta-grad:    linear-gradient(135deg, #0D1B2E 0%, #1A6FBF 50%, #2563EB 100%);
+      --sugar-grad:  radial-gradient(circle at 30% 30%, #1E3A5F, #1A6FBF 35%, #2563EB 70%, #3B82F6);
+      --sugar-shadow:rgba(59,130,246,0.35);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.65;
+      transition: background 0.35s, color 0.35s;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── 스크롤 진행 바 ──────────────────────── */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent2));
+      z-index: 200;
+      transition: width 0.1s linear;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 6%;
+      background: var(--nav-bg);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+    }
+
+    nav.scrolled { box-shadow: 0 2px 16px rgba(26,111,191,0.12); }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span { color: var(--text); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.92rem;
+      color: var(--muted);
+      transition: color 0.2s;
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px;
+      transition: width 0.25s;
+    }
+
+    .nav-links a:hover { color: var(--primary); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .btn-theme {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-theme:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .btn-theme .icon-light { display: inline; }
+    .btn-theme .icon-dark  { display: none; }
+    [data-theme="dark"] .btn-theme .icon-light { display: none; }
+    [data-theme="dark"] .btn-theme .icon-dark  { display: inline; }
+
+    /* ── 버튼 공통 ───────────────────────────── */
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.6rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.22s;
+      border: none;
+      font-family: inherit;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(26,111,191,0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26,111,191,0.45);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .btn-white {
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 700;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-white:hover {
+      background: #EFF6FF;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    }
+
+    /* ── 섹션 공통 ───────────────────────────── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.7rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.7rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent2));
+      border-radius: 4px;
+      margin: 0.5rem auto 0;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0.8rem auto 0;
+    }
+
+    /* ── 스크롤 애니메이션 ───────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-up:nth-child(2) { transition-delay: 0.1s; }
+    .fade-up:nth-child(3) { transition-delay: 0.2s; }
+    .fade-up:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ── HERO ────────────────────────────────── */
+    .hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      padding: 5.5rem 6% 5rem;
+      background: var(--hero-grad);
+      overflow: hidden;
+      transition: background 0.35s;
+    }
+
+    /* 배경 장식 원 */
+    .hero::before,
+    .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%);
+      top: -150px;
+      right: -100px;
+    }
+
+    .hero::after {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%);
+      bottom: -80px;
+      left: 5%;
+    }
+
+    .hero-content {
+      flex: 1;
+      max-width: 580px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 1rem;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 1.6rem;
+      border: 1px solid rgba(26,111,191,0.2);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 span {
+      color: var(--primary);
+      position: relative;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 2.4rem;
+      max-width: 480px;
+      line-height: 1.75;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-cta .btn { font-size: 1rem; padding: 0.85rem 2rem; }
+
+    .hero-visual {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sugar-wrapper {
+      position: relative;
+      width: 340px;
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 회전 링 */
+    .sugar-ring {
+      position: absolute;
+      inset: -24px;
+      border-radius: 50%;
+      border: 2px dashed rgba(59,130,246,0.3);
+      animation: spin 12s linear infinite;
+    }
+
+    .sugar-ring::before {
+      content: '✦';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .sugar-ring2 {
+      position: absolute;
+      inset: -48px;
+      border-radius: 50%;
+      border: 1px dashed rgba(6,182,212,0.2);
+      animation: spin 20s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .sugar-visual {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: var(--sugar-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6.5rem;
+      box-shadow: 0 24px 64px var(--sugar-shadow),
+                  inset 0 -10px 30px rgba(0,0,0,0.08),
+                  inset 0 10px 20px rgba(255,255,255,0.15);
+      animation: float 3.5s ease-in-out infinite;
+      transition: background 0.35s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%       { transform: translateY(-14px) scale(1.02); }
+    }
+
+    @keyframes emoji-pop {
+      0%   { transform: scale(0.6); opacity: 0; }
+      60%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .sugar-visual.changing {
+      animation: emoji-pop 0.4s ease forwards;
+    }
+
+    /* ── STATS ───────────────────────────────── */
+    .stats {
+      display: flex;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--accent));
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 20px,
+        rgba(255,255,255,0.03) 20px,
+        rgba(255,255,255,0.03) 40px
+      );
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 2.2rem 1rem;
+      border-right: 1px solid rgba(255,255,255,0.15);
+      position: relative;
+      z-index: 1;
+      transition: background 0.2s;
+    }
+
+    .stat:last-child { border-right: none; }
+    .stat:hover { background: rgba(255,255,255,0.07); }
+
+    .stat-value {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      opacity: 0.8;
+      margin-top: 0.4rem;
+      font-weight: 500;
+    }
+
+    /* ── PRODUCTS ────────────────────────────── */
+    .products {
+      padding: 6rem 6%;
+      background: var(--bg);
+      transition: background 0.35s;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s, background 0.35s;
+      position: relative;
+    }
+
+    /* 카드 상단 컬러 바 */
+    .product-card::before {
+      content: '';
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: height 0.25s;
+    }
+
+    .product-card:hover::before { height: 6px; }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .product-thumb {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.2rem;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover .product-thumb { transform: scale(1.08); }
+
+    .product-thumb.white-s  { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); }
+    .product-thumb.raw      { background: linear-gradient(135deg, #FEF9C3, #FDE68A); }
+    .product-thumb.organic  { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); }
+    .product-thumb.cube     { background: linear-gradient(135deg, #F3E8FF, #E9D5FF); }
+
+    .product-info { padding: 1.5rem; }
+
+    .product-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+    }
+
+    .product-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-info p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── WHY US ──────────────────────────────── */
+    .why {
+      padding: 6rem 6%;
+      background: var(--white);
+      transition: background 0.35s;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .why-item {
+      text-align: center;
+      padding: 2.2rem 1.5rem;
+      border-radius: var(--radius);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+      cursor: default;
+    }
+
+    .why-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 0 2px var(--primary), var(--shadow-lg);
+      background: var(--card-bg);
+    }
+
+    .why-icon {
+      font-size: 2.6rem;
+      margin-bottom: 1rem;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .why-item:hover .why-icon { transform: scale(1.15) rotate(-5deg); }
+
+    .why-item h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .why-item p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── PROCESS ─────────────────────────────── */
+    .process {
+      padding: 6rem 6%;
+      background: var(--bg);
+      transition: background 0.35s;
+    }
+
+    .process-track {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      max-width: 940px;
+      margin: 3.5rem auto 0;
+      flex-wrap: wrap;
+    }
+
+    /* 연결선 */
+    .process-track::before {
+      content: '';
+      position: absolute;
+      top: 23px;
+      left: calc(10% + 24px);
+      right: calc(10% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent2));
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .process-step {
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      padding: 0 0.8rem;
+      position: relative;
+    }
+
+    .process-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 4px 12px var(--sugar-shadow);
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s;
+    }
+
+    .process-step:hover .process-num { transform: scale(1.12); }
+
+    .process-step h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .process-step p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── CTA ─────────────────────────────────── */
+    .cta-wrapper { padding: 0 6% 4rem; }
+
+    .cta-section {
+      padding: 5rem 3rem;
+      background: var(--cta-grad);
+      border-radius: 24px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      top: -150px;
+      right: -100px;
+      pointer-events: none;
+    }
+
+    .cta-section::after {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      bottom: -80px;
+      left: 5%;
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 800;
+      margin-bottom: 0.8rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section p {
+      font-size: 1.05rem;
+      opacity: 0.88;
+      margin-bottom: 2.2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section .btn-white { position: relative; z-index: 1; font-size: 1rem; padding: 0.9rem 2.4rem; }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 6%;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.88rem;
+      background: var(--white);
+      transition: background 0.35s, border-color 0.35s;
+    }
+
+    footer strong { color: var(--primary); }
+
+    /* ── 반응형 ──────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; padding: 4rem 5% 3rem; }
+      .hero p { margin-left: auto; margin-right: auto; }
+      .hero-cta { justify-content: center; }
+      .hero-visual { order: -1; }
+      .sugar-wrapper { width: 240px; height: 240px; }
+      .sugar-visual { width: 200px; height: 200px; font-size: 5rem; }
+      .sugar-ring { inset: -18px; }
+      .sugar-ring2 { inset: -36px; }
+      .nav-links { display: none; }
+      .stats { flex-wrap: wrap; }
+      .stat { flex: 1 1 45%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
+      .process-track::before { display: none; }
+      .cta-wrapper { padding: 0 4% 3rem; }
+      .cta-section { padding: 3.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 스크롤 진행 바 -->
+  <div id="progress-bar"></div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="logo">대한<span>제당</span></a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#products">제품</a></li>
+        <li><a href="#why">품질</a></li>
+        <li><a href="#process">제조공정</a></li>
+        <li><a href="#contact">문의</a></li>
+      </ul>
+      <button class="btn-theme" onclick="toggleTheme()" title="테마 변경">
+        <span class="icon-light">🌙 다크</span>
+        <span class="icon-dark">☀️ 라이트</span>
+      </button>
+      <a href="#contact" class="btn btn-primary">구매 문의</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">🏢 1953년 창립 · 70년의 신뢰</span>
+      <h1>자연 그대로의<br><span>순수한 달콤함</span></h1>
+      <p>엄선된 원료에서 시작해 최첨단 정제 공정을 거쳐 탄생하는 대한제당의 설탕. 가정의 식탁과 식품산업 현장 모두에서 믿을 수 있는 품질을 제공합니다.</p>
+      <div class="hero-cta">
+        <a href="#products" class="btn btn-primary">제품 살펴보기</a>
+        <a href="#process" class="btn btn-outline">제조공정 보기</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="sugar-wrapper">
+        <div class="sugar-ring2"></div>
+        <div class="sugar-ring"></div>
+        <div class="sugar-visual" id="sugar-emoji">🍚</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" data-target="70" data-suffix="년+">0</div>
+      <div class="stat-label">업계 경험</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="99.9" data-suffix="%" data-decimal="1">0</div>
+      <div class="stat-label">순도 기준</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">HACCP</div>
+      <div class="stat-label">식품안전 인증</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">전국</div>
+      <div class="stat-label">유통망 보유</div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section class="products" id="products">
+    <div class="section-header fade-up">
+      <span class="section-label">Products</span>
+      <h2 class="section-title">제품 라인업</h2>
+      <p class="section-sub">다양한 용도와 취향에 맞춘 대한제당의 설탕 제품을 만나보세요.</p>
+    </div>
+    <div class="product-grid">
+      <div class="product-card fade-up">
+        <div class="product-thumb white-s">🧂</div>
+        <div class="product-info">
+          <span class="product-tag">베스트셀러</span>
+          <h3>백설탕</h3>
+          <p>가장 기본이 되는 순도 높은 정제 백설탕. 조리, 베이킹, 음료 등 모든 요리에 활용 가능합니다.</p>
+        </div>
+      </div>
+      <div class="product-card fade-up">
+        <div class="product-thumb raw">🟡</div>
+        <div class="product-info">
+          <span class="product-tag">풍미</span>
+          <h3>황설탕</h3>
+          <p>은은한 당밀 향과 깊은 풍미. 카레, 갈비찜, 케이크에 특히 잘 어울립니다.</p>
+        </div>
+      </div>
+      <div class="product-card fade-up">
+        <div class="product-thumb organic">🌿</div>
+        <div class="product-info">
+          <span class="product-tag">프리미엄</span>
+          <h3>유기농 설탕</h3>
+          <p>유기농 인증 사탕수수로 만든 비정제 설탕. 건강을 생각하는 소비자를 위한 선택.</p>
+        </div>
+      </div>
+      <div class="product-card fade-up">
+        <div class="product-thumb cube">🟪</div>
+        <div class="product-info">
+          <span class="product-tag">편의성</span>
+          <h3>각설탕</h3>
+          <p>정밀하게 성형된 각설탕. 카페·호텔·오피스 등 고급 서비스 현장에 적합합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="why" id="why">
+    <div class="section-header fade-up">
+      <span class="section-label">Why Us</span>
+      <h2 class="section-title">대한제당을 선택하는 이유</h2>
+      <p class="section-sub">품질, 안전, 신뢰 — 세 가지를 모두 갖췄습니다.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-item fade-up">
+        <span class="why-icon">🏭</span>
+        <h3>최첨단 정제 설비</h3>
+        <p>최신 연속 결정화 공정으로 균일한 입자와 높은 순도를 보장합니다.</p>
+      </div>
+      <div class="why-item fade-up">
+        <span class="why-icon">🔬</span>
+        <h3>엄격한 품질 관리</h3>
+        <p>원료 입고부터 출하까지 매 단계 성분 분석과 미생물 검사를 실시합니다.</p>
+      </div>
+      <div class="why-item fade-up">
+        <span class="why-icon">🌏</span>
+        <h3>안정적인 공급망</h3>
+        <p>글로벌 원료 조달 네트워크로 수급 불안 없이 안정적으로 납품합니다.</p>
+      </div>
+      <div class="why-item fade-up">
+        <span class="why-icon">♻️</span>
+        <h3>친환경 경영</h3>
+        <p>부산물을 재활용하고 탄소 저감 공정을 도입해 지속 가능한 생산을 실천합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="process" id="process">
+    <div class="section-header fade-up">
+      <span class="section-label">Process</span>
+      <h2 class="section-title">정성을 담은 제조 공정</h2>
+      <p class="section-sub">원료에서 포장까지, 모든 과정에 품질이 깃들어 있습니다.</p>
+    </div>
+    <div class="process-track">
+      <div class="process-step fade-up">
+        <div class="process-num">1</div>
+        <h3>원료 선별</h3>
+        <p>브라질·호주산<br>고품질 원당 엄선</p>
+      </div>
+      <div class="process-step fade-up">
+        <div class="process-num">2</div>
+        <h3>용해 · 여과</h3>
+        <p>불순물 제거 및<br>탈색 처리</p>
+      </div>
+      <div class="process-step fade-up">
+        <div class="process-num">3</div>
+        <h3>결정화</h3>
+        <p>진공 결정관에서<br>균일 결정 생성</p>
+      </div>
+      <div class="process-step fade-up">
+        <div class="process-num">4</div>
+        <h3>건조 · 선별</h3>
+        <p>입도별 분류 및<br>수분 조절</p>
+      </div>
+      <div class="process-step fade-up">
+        <div class="process-num">5</div>
+        <h3>포장 · 출하</h3>
+        <p>위생 포장 후<br>품질 최종 확인</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact">
+    <div class="cta-wrapper">
+      <div class="cta-section fade-up">
+        <h2>지금 바로 문의하세요</h2>
+        <p>대량 구매·B2B 납품·맞춤 제품 등 어떤 상담이든 환영합니다.</p>
+        <a href="mailto:info@cts.co.kr" class="btn btn-white">구매 상담 신청 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p><strong>대한제당 주식회사</strong> · 서울특별시 중구 · 사업자등록번호 000-00-00000</p>
+    <p style="margin-top:0.4rem;">© 2026 CTS Corp. All rights reserved.</p>
+  </footer>
+
+  <script>
+    /* 테마 토글 */
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    /* 스크롤 진행 바 + nav 그림자 */
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    /* 섹션 fade-up (IntersectionObserver) */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    /* 숫자 카운트업 애니메이션 */
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const target = parseFloat(el.dataset.target);
+        const suffix = el.dataset.suffix || '';
+        const decimal = parseInt(el.dataset.decimal || '0');
+        const duration = 1600;
+        const start = performance.now();
+
+        function update(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const value = target * eased;
+          el.textContent = value.toFixed(decimal) + suffix;
+          if (progress < 1) requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+        countObserver.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('[data-target]').forEach(el => countObserver.observe(el));
+
+    /* 설탕 이모지 2초마다 교체 */
+    const sugarEmojis = ['🍚', '🐄', '🟤', '🐖', '🍬', '🐔', '🧂', '🥩', '🍯', '🐑'];
+    let emojiIndex = 0;
+    const sugarEl = document.getElementById('sugar-emoji');
+
+    setInterval(() => {
+      emojiIndex = (emojiIndex + 1) % sugarEmojis.length;
+      sugarEl.classList.remove('changing');
+      void sugarEl.offsetWidth; // reflow로 애니메이션 재시작
+      sugarEl.textContent = sugarEmojis[emojiIndex];
+      sugarEl.classList.add('changing');
+    }, 2000);
+  </script>
+
+</body>
+</html>
