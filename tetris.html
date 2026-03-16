@@ -728,7 +728,11 @@ function lockPiece() {
 
   if (count > 0) {
     triggerFlash();
-    cleared.forEach(r => { board.splice(r, 1); board.unshift(Array(COLS).fill(null)); });
+    // cleared는 큰 인덱스(아래)→작은 인덱스(위) 순서이므로
+    // 먼저 전부 splice(높은 인덱스부터 삭제해야 앞 인덱스가 밀리지 않음)한 뒤
+    // 빈 줄을 위에 추가해야 인덱스 오류가 없다
+    cleared.forEach(r => board.splice(r, 1));
+    for (let i = 0; i < count; i++) board.unshift(Array(COLS).fill(null));
 
     const prevLevel = level;
     lines  += count;
@@ -1026,14 +1030,11 @@ function loop(ts) {
   if (dropTimer >= dropInterval) {
     dropTimer = 0;
     if (!collides(piece, piece.x, piece.y + 1)) { piece.y++; lockTimer = 0; }
-    else {
-      lockTimer += dropInterval;
-      if (lockTimer >= 500) lockPiece();
-    }
+    else { lockTimer += dropInterval; }
   }
 
-  // 락 딜레이 (바닥 닿은 후 자동 잠금)
-  if (!collides(piece, piece.x, piece.y + 1) === false) {
+  // 락 딜레이 (바닥에 닿아 있을 때 실시간으로 누적 → 500ms 후 잠금)
+  if (collides(piece, piece.x, piece.y + 1)) {
     lockTimer += dt;
     if (lockTimer >= 500) lockPiece();
   }
