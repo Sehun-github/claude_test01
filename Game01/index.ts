@@ -252,7 +252,7 @@ function checkBrickCollision() {
     const dx = ballX - brickCenterX;
     const dy = ballY - brickCenterY;
 
-    if (Math.abs(dy) >= Math.abs(dx) * 0.5) {
+    if (Math.abs(dy) >= Math.abs(dx) * 1.0) {
       ballDY = -ballDY;
     } else {
       ballDX = -ballDX;
@@ -271,6 +271,19 @@ function update() {
       popup("패들 원래 크기");
     }
   }
+
+  // 낙하 아이템 이동 & 수집 (미발사 상태에서도 계속 떨어져야 함)
+  fallingItems = fallingItems.filter(fi => {
+    fi.y += 0.4;
+    const iy = Math.round(fi.y);
+    const ix = Math.round(fi.x);
+    const px2 = Math.round(paddleX);
+    if (iy >= H - 1 && ix >= px2 && ix < px2 + paddleW) {
+      applyItem(fi.kind);
+      return false;
+    }
+    return fi.y < H + 1;
+  });
 
   // 미발사 상태: 공을 패들에 붙임
   if (!launched) {
@@ -318,19 +331,6 @@ function update() {
     }
     return;
   }
-
-  // 낙하 아이템 이동 & 수집
-  fallingItems = fallingItems.filter(fi => {
-    fi.y += 0.4;
-    const iy = Math.round(fi.y);
-    const ix = Math.round(fi.x);
-    const px2 = Math.round(paddleX);
-    if (iy >= H - 1 && ix >= px2 && ix < px2 + paddleW) {
-      applyItem(fi.kind);
-      return false;
-    }
-    return fi.y < H + 1;
-  });
 
   // 클리어 체크
   const remaining = bricks.flat().filter(b => b !== null).length;
