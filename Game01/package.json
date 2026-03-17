@@ -1,0 +1,6 @@
+{
+  "name": "game01-ball-bounce",
+  "scripts": {
+    "start": "bun index.ts"
+  }
+}

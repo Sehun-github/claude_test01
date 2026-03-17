@@ -1,0 +1,52 @@
+[
+  {
+    "question": "다음 중 훈민정음 해례본에 대한 설명으로 옳지 않은 것은?",
+    "options": [
+      "세종대왕이 직접 저술한 책이다.",
+      "1997년 유네스코 세계기록유산으로 등재되었다.",
+      "자음 17자, 모음 11자로 총 28자를 설명하고 있다.",
+      "한글의 제자 원리를 설명한 해설서이다."
+    ],
+    "answer": 1
+  },
+  {
+    "question": "log₂3 = a, log₂5 = b 일 때, log₂30을 a, b로 나타내면?",
+    "options": [
+      "a + b + 1",
+      "a + b + 2",
+      "2a + b",
+      "a + 2b"
+    ],
+    "answer": 1
+  },
+  {
+    "question": "다음 중 삼투압에 대한 설명으로 옳은 것은?",
+    "options": [
+      "삼투압은 용질의 종류에 따라 달라진다.",
+      "삼투압은 절대온도와 몰농도에 비례한다.",
+      "삼투압은 용매의 밀도에 비례한다.",
+      "반투막 없이도 삼투 현상이 일어난다."
+    ],
+    "answer": 2
+  },
+  {
+    "question": "조선 후기 실학자 중 '북학의'를 저술하여 청나라의 문물 수용을 주장한 인물은?",
+    "options": [
+      "정약용",
+      "유형원",
+      "박지원",
+      "박제가"
+    ],
+    "answer": 4
+  },
+  {
+    "question": "다음 영어 문장의 빈칸에 들어갈 가장 적절한 것은?\n\"The results of the experiment were _____ to those predicted by the theoretical model.\"",
+    "options": [
+      "contradictory",
+      "analogous",
+      "indifferent",
+      "subordinate"
+    ],
+    "answer": 2
+  }
+]

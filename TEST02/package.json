@@ -1,0 +1,9 @@
+{
+  "name": "quiz-cli",
+  "scripts": {
+    "start": "bun index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0"
+  }
+}
