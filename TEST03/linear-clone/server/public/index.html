@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linear Clone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- 이슈 생성 모달 -->
+<div id="issue-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-top">
+      <select id="issue-project" class="modal-select"></select>
+    </div>
+    <input type="text" id="issue-title" class="modal-title-input" placeholder="이슈 제목" />
+    <textarea id="issue-desc" class="modal-desc-input" placeholder="설명 (선택)"></textarea>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <select id="issue-status" class="prop-select">
+          <option value="backlog">📋 백로그</option>
+          <option value="todo" selected>⭕ 할일</option>
+          <option value="in_progress">🔵 진행중</option>
+          <option value="in_review">🟡 검토중</option>
+          <option value="done">✅ 완료</option>
+          <option value="cancelled">❌ 취소</option>
+        </select>
+        <select id="issue-priority" class="prop-select">
+          <option value="0">— 우선순위 없음</option>
+          <option value="1">🔴 긴급</option>
+          <option value="2">🟠 높음</option>
+          <option value="3" selected>🟡 보통</option>
+          <option value="4">🔵 낮음</option>
+        </select>
+        <select id="issue-assignee" class="prop-select">
+          <option value="">담당자 없음</option>
+        </select>
+      </div>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost" id="modal-cancel">취소</button>
+        <button class="btn btn-primary" id="modal-save">생성</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 이슈 상세 패널 -->
+<div id="detail-panel" class="detail-panel hidden">
+  <div class="detail-header">
+    <span id="detail-identifier" class="detail-id"></span>
+    <div class="detail-actions">
+      <button class="icon-btn" id="detail-delete" title="삭제">🗑</button>
+      <button class="icon-btn" id="detail-close">✕</button>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-title-wrap">
+      <div id="detail-title" class="detail-title" contenteditable="true"></div>
+    </div>
+    <div class="detail-props">
+      <div class="prop-row">
+        <span class="prop-label">상태</span>
+        <select id="detail-status" class="prop-select-light"></select>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">우선순위</span>
+        <select id="detail-priority" class="prop-select-light"></select>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">담당자</span>
+        <select id="detail-assignee" class="prop-select-light"></select>
+      </div>
+      <div class="prop-row">
+        <span class="prop-label">프로젝트</span>
+        <select id="detail-project" class="prop-select-light"></select>
+      </div>
+    </div>
+    <div class="detail-desc-wrap">
+      <div id="detail-desc" class="detail-desc" contenteditable="true" data-placeholder="설명 추가..."></div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <div class="sidebar-workspace">
+      <div class="workspace-icon">L</div>
+      <span class="workspace-name">Linear Clone</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-view="all" href="#">
+        <span class="nav-icon">📋</span> 모든 이슈
+      </a>
+      <a class="nav-item" data-view="my" href="#">
+        <span class="nav-icon">👤</span> 내 이슈
+      </a>
+    </nav>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">
+        <span>프로젝트</span>
+        <button class="sidebar-add-btn" id="btn-add-project">+</button>
+      </div>
+      <div id="project-list"></div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-section-title">상태별</div>
+      <a class="nav-item" data-view="backlog" href="#">📋 백로그</a>
+      <a class="nav-item" data-view="todo" href="#">⭕ 할일</a>
+      <a class="nav-item" data-view="in_progress" href="#">🔵 진행중</a>
+      <a class="nav-item" data-view="in_review" href="#">🟡 검토중</a>
+      <a class="nav-item" data-view="done" href="#">✅ 완료</a>
+    </div>
+  </aside>
+
+  <!-- 메인 -->
+  <main class="main">
+    <div class="main-header">
+      <div class="main-title-row">
+        <h1 id="view-title">모든 이슈</h1>
+        <div class="header-actions">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" data-layout="list" title="목록">☰</button>
+            <button class="view-toggle-btn" data-layout="board" title="보드">⊞</button>
+          </div>
+          <button class="btn btn-primary" id="btn-new-issue">+ 이슈 생성</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍  이슈 검색..." />
+        <select id="filter-priority" class="filter-select">
+          <option value="">우선순위 전체</option>
+          <option value="1">🔴 긴급</option>
+          <option value="2">🟠 높음</option>
+          <option value="3">🟡 보통</option>
+          <option value="4">🔵 낮음</option>
+          <option value="0">— 없음</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="issue-container" class="issue-container"></div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
