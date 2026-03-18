@@ -1,0 +1,13 @@
+{
+  "name": "conv-viewer",
+  "version": "1.0.0",
+  "description": "Claude 대화 세션 관리자",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
+    "express": "^5.2.1"
+  }
+}

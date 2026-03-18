@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스도쿠</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Nunito', sans-serif;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(90deg, #a18cd1, #fbc2eb, #a1c4fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 3px;
+    }
+
+    .difficulty {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .diff-btn {
+      padding: 8px 22px;
+      border-radius: 20px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.55);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .diff-btn:hover, .diff-btn.active {
+      border-color: #a18cd1;
+      color: white;
+      background: rgba(161,140,209,0.2);
+    }
+
+    .stats {
+      display: flex;
+      gap: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fbc2eb;
+    }
+
+    .stat-value.best-value {
+      color: #ffd700;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Progress Bar */
+    .progress-wrapper {
+      width: 522px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+      border-radius: 10px;
+      transition: width 0.35s ease;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+      min-width: 32px;
+      text-align: right;
+    }
+
+    .board-container {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(9, 54px);
+      grid-template-rows: repeat(9, 54px);
+      border: 2.5px solid rgba(255,255,255,0.35);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .cell {
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(15,12,41,0.85);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.12s;
+      user-select: none;
+      position: relative;
+    }
+
+    .cell:nth-child(9n)   { border-right: none; }
+    .cell[data-col="2"]   { border-right: 2.5px solid rgba(255,255,255,0.3); }
+    .cell[data-col="5"]   { border-right: 2.5px solid rgba(255,255,255,0.3); }
+    .cell[data-row="2"]   { border-bottom: 2.5px solid rgba(255,255,255,0.3); }
+    .cell[data-row="5"]   { border-bottom: 2.5px solid rgba(255,255,255,0.3); }
+
+    .cell.box-dark { background: rgba(8,6,30,0.9); }
+
+    .cell.given      { color: #a1c4fd; }
+    .cell.user-input { color: #fbc2eb; }
+    .cell.conflict   { color: #ff6b6b !important; background: rgba(255,107,107,0.18) !important; }
+    .cell.selected   { background: rgba(161,140,209,0.38) !important; }
+    .cell.highlight  { background: rgba(161,140,209,0.12) !important; }
+    .cell.same-num   { background: rgba(161,140,209,0.22) !important; }
+    .cell.hint-flash { animation: hintFlash 0.6s ease; }
+
+    @keyframes hintFlash {
+      0%,100% { background: rgba(161,140,209,0.38); }
+      50%      { background: rgba(168,255,120,0.45); }
+    }
+
+    /* 행·열·박스 완성 반짝 효과 */
+    .cell.complete-flash {
+      animation: completeFlash 0.75s ease forwards;
+    }
+
+    @keyframes completeFlash {
+      0%   { box-shadow: inset 0 0 0 54px rgba(100,255,180,0.45); }
+      60%  { box-shadow: inset 0 0 0 54px rgba(100,255,180,0.2); }
+      100% { box-shadow: inset 0 0 0 54px rgba(100,255,180,0); }
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      grid-template-rows: repeat(3,1fr);
+      width: 100%;
+      height: 100%;
+      padding: 3px;
+    }
+
+    .note {
+      font-size: 0.52rem;
+      font-weight: 700;
+      color: rgba(161,140,209,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .num-btn {
+      padding: 13px 0;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .num-btn:hover {
+      background: rgba(161,140,209,0.28);
+      border-color: #a18cd1;
+      transform: translateY(-2px);
+    }
+
+    .num-btn.erase {
+      font-size: 0.85rem;
+      color: #ff6b6b;
+      border-color: rgba(255,107,107,0.25);
+    }
+
+    .num-btn.notes-toggle {
+      font-size: 0.82rem;
+      color: #fbc2eb;
+      border-color: rgba(251,194,235,0.25);
+    }
+
+    .num-btn.notes-toggle.active {
+      background: rgba(251,194,235,0.18);
+      border-color: #fbc2eb;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .ctrl-btn {
+      flex: 1;
+      padding: 11px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-1px);
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .overlay.show { display: flex; }
+
+    .overlay-box {
+      background: linear-gradient(135deg, #1a1a3e, #2d2b55);
+      border: 2px solid rgba(161,140,209,0.4);
+      border-radius: 24px;
+      padding: 2.5rem 3.5rem;
+      text-align: center;
+      animation: popIn 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5) translateY(20px); opacity: 0; }
+      to   { transform: scale(1) translateY(0);      opacity: 1; }
+    }
+
+    .overlay-emoji { font-size: 3.5rem; margin-bottom: 0.5rem; }
+    .overlay-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .overlay-stats { color: #fbc2eb; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .overlay-best  { color: #ffd700; font-size: 0.95rem; margin-bottom: 1.8rem; min-height: 1.3rem; }
+
+    .overlay-btn {
+      padding: 13px 36px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+      color: #1a1a3e;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(161,140,209,0.4);
+    }
+
+    .overlay-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(161,140,209,0.6);
+    }
+  </style>
+</head>
+<body>
+
+<h1>✦ 스도쿠 ✦</h1>
+
+<div class="difficulty">
+  <button class="diff-btn active" onclick="setDifficulty('easy',this)">쉬움</button>
+  <button class="diff-btn" onclick="setDifficulty('medium',this)">보통</button>
+  <button class="diff-btn" onclick="setDifficulty('hard',this)">어려움</button>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value" id="timer">00:00</div>
+    <div class="stat-label">시간</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value" id="mistakes">0 / 3</div>
+    <div class="stat-label">실수</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value best-value" id="bestTime">--:--</div>
+    <div class="stat-label">베스트</div>
+  </div>
+</div>
+
+<div class="progress-wrapper">
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0%</div>
+</div>
+
+<div class="board-container">
+  <div class="grid" id="grid"></div>
+
+  <div class="numpad">
+    <button class="num-btn" onclick="inputNum(1)">1</button>
+    <button class="num-btn" onclick="inputNum(2)">2</button>
+    <button class="num-btn" onclick="inputNum(3)">3</button>
+    <button class="num-btn" onclick="inputNum(4)">4</button>
+    <button class="num-btn" onclick="inputNum(5)">5</button>
+    <button class="num-btn" onclick="inputNum(6)">6</button>
+    <button class="num-btn" onclick="inputNum(7)">7</button>
+    <button class="num-btn" onclick="inputNum(8)">8</button>
+    <button class="num-btn" onclick="inputNum(9)">9</button>
+    <button class="num-btn erase" onclick="inputNum(0)">✕ 지우기</button>
+    <button class="num-btn notes-toggle" id="notesBtn" onclick="toggleNotes()">✏ 메모</button>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" onclick="newGame()">🔄 새 게임</button>
+    <button class="ctrl-btn" onclick="getHint()">💡 힌트</button>
+  </div>
+</div>
+
+<!-- Win -->
+<div class="overlay" id="winOverlay">
+  <div class="overlay-box">
+    <div class="overlay-emoji">🎉</div>
+    <div class="overlay-title">완성!</div>
+    <div class="overlay-stats" id="winStats"></div>
+    <div class="overlay-best" id="winBest"></div>
+    <button class="overlay-btn" onclick="newGame();document.getElementById('winOverlay').classList.remove('show')">다시 하기</button>
+  </div>
+</div>
+
+<!-- Lose -->
+<div class="overlay" id="loseOverlay">
+  <div class="overlay-box">
+    <div class="overlay-emoji">😢</div>
+    <div class="overlay-title">게임 오버</div>
+    <div class="overlay-stats">실수 3회 초과</div>
+    <div class="overlay-best"></div>
+    <button class="overlay-btn" onclick="newGame();document.getElementById('loseOverlay').classList.remove('show')">다시 하기</button>
+  </div>
+</div>
+
+<script>
+  let puzzle=[], solution=[], board=[], given=[], notes=[];
+  let selected=null, mistakes=0, seconds=0;
+  let timerInterval=null, notesMode=false, difficulty='easy';
+
+  // ── Best Record ─────────────────────────────────────
+
+  function getBest() {
+    const v = localStorage.getItem(`sudoku_best_${difficulty}`);
+    return v ? parseInt(v) : null;
+  }
+
+  function saveBest(s) {
+    localStorage.setItem(`sudoku_best_${difficulty}`, s);
+  }
+
+  function fmtTime(s) {
+    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }
+
+  function updateBestDisplay() {
+    const best = getBest();
+    document.getElementById('bestTime').textContent = best !== null ? fmtTime(best) : '--:--';
+  }
+
+  // ── Progress ────────────────────────────────────────
+
+  function updateProgress() {
+    let total = 0, filled = 0;
+    for (let r=0;r<9;r++) for (let c=0;c<9;c++) {
+      if (!given[r][c]) { total++; if (board[r][c]!==0) filled++; }
+    }
+    const pct = total > 0 ? Math.round(filled / total * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = pct + '%';
+  }
+
+  // ── Complete Flash ──────────────────────────────────
+
+  function getCompletedGroups(r, c) {
+    const indices = new Set();
+
+    // Row
+    if (board[r].every(v => v !== 0)) {
+      for (let col=0;col<9;col++) indices.add(r*9+col);
+    }
+
+    // Column
+    if (board.every(row => row[c] !== 0)) {
+      for (let row=0;row<9;row++) indices.add(row*9+c);
+    }
+
+    // 3×3 box
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    let boxDone = true;
+    for (let i=br;i<br+3;i++) for (let j=bc;j<bc+3;j++) if (board[i][j]===0) { boxDone=false; break; }
+    if (boxDone) {
+      for (let i=br;i<br+3;i++) for (let j=bc;j<bc+3;j++) indices.add(i*9+j);
+    }
+
+    return indices;
+  }
+
+  function flashGroups(indices) {
+    if (indices.size === 0) return;
+    const grid = document.getElementById('grid');
+    indices.forEach(idx => {
+      const el = grid.children[idx];
+      if (el) {
+        el.classList.remove('complete-flash');
+        void el.offsetWidth; // reflow to restart animation
+        el.classList.add('complete-flash');
+      }
+    });
+    setTimeout(() => {
+      indices.forEach(idx => {
+        const el = grid.children[idx];
+        if (el) el.classList.remove('complete-flash');
+      });
+    }, 750);
+  }
+
+  // ── Generator ──────────────────────────────────────
+
+  function generateBoard() {
+    const b = Array(9).fill(null).map(()=>Array(9).fill(0));
+    fillBoard(b);
+    return b;
+  }
+
+  function fillBoard(b) {
+    const e = findEmpty(b);
+    if (!e) return true;
+    const [r,c] = e;
+    for (const n of shuffled([1,2,3,4,5,6,7,8,9])) {
+      if (isValid(b,r,c,n)) {
+        b[r][c]=n;
+        if (fillBoard(b)) return true;
+        b[r][c]=0;
+      }
+    }
+    return false;
+  }
+
+  function findEmpty(b) {
+    for (let r=0;r<9;r++) for (let c=0;c<9;c++) if (b[r][c]===0) return [r,c];
+    return null;
+  }
+
+  function isValid(b,r,c,n) {
+    if (b[r].includes(n)) return false;
+    if (b.some(row=>row[c]===n)) return false;
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for (let i=br;i<br+3;i++) for (let j=bc;j<bc+3;j++) if (b[i][j]===n) return false;
+    return true;
+  }
+
+  function shuffled(arr) {
+    const a=[...arr];
+    for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function removeCells(sol, count) {
+    const p=sol.map(r=>[...r]);
+    const positions=shuffled([...Array(81).keys()]);
+    let removed=0;
+    for (const pos of positions) {
+      if (removed>=count) break;
+      const r=Math.floor(pos/9), c=pos%9;
+      const bk=p[r][c]; p[r][c]=0;
+      if (countSolutions(p.map(x=>[...x]),0)===1) removed++;
+      else p[r][c]=bk;
+    }
+    return p;
+  }
+
+  function countSolutions(b,cnt) {
+    if (cnt>1) return cnt;
+    const e=findEmpty(b);
+    if (!e) return cnt+1;
+    const [r,c]=e;
+    for (let n=1;n<=9;n++) {
+      if (isValid(b,r,c,n)) { b[r][c]=n; cnt=countSolutions(b,cnt); b[r][c]=0; if(cnt>1) return cnt; }
+    }
+    return cnt;
+  }
+
+  // ── Game ───────────────────────────────────────────
+
+  function newGame() {
+    clearInterval(timerInterval);
+    seconds=0; mistakes=0; selected=null; notesMode=false;
+    document.getElementById('notesBtn').classList.remove('active');
+    document.getElementById('timer').textContent='00:00';
+    document.getElementById('mistakes').textContent='0 / 3';
+
+    const removeCount = difficulty==='easy'?35 : difficulty==='medium'?46 : 53;
+    const sol=generateBoard();
+    solution=sol.map(r=>[...r]);
+    puzzle=removeCells(sol,removeCount);
+    board=puzzle.map(r=>[...r]);
+    given=puzzle.map(r=>r.map(v=>v!==0));
+    notes=Array(9).fill(null).map(()=>Array(9).fill(null).map(()=>new Set()));
+
+    timerInterval=setInterval(()=>{
+      seconds++;
+      document.getElementById('timer').textContent=fmtTime(seconds);
+    },1000);
+
+    updateBestDisplay();
+    updateProgress();
+    render();
+  }
+
+  function setDifficulty(d,btn) {
+    difficulty=d;
+    document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    newGame();
+  }
+
+  function selectCell(r,c) { selected={row:r,col:c}; render(); }
+
+  function inputNum(n) {
+    if (!selected) return;
+    const {row,col}=selected;
+    if (given[row][col]) return;
+
+    if (notesMode && n!==0) {
+      if (board[row][col]!==0) return;
+      notes[row][col].has(n) ? notes[row][col].delete(n) : notes[row][col].add(n);
+      render(); return;
+    }
+
+    if (n===0) { board[row][col]=0; notes[row][col].clear(); render(); updateProgress(); return; }
+    if (board[row][col]===n) return;
+
+    const isCorrect = (n === solution[row][col]);
+
+    if (!isCorrect) {
+      mistakes++;
+      document.getElementById('mistakes').textContent=`${mistakes} / 3`;
+      if (mistakes>=3) {
+        clearInterval(timerInterval);
+        document.getElementById('loseOverlay').classList.add('show');
+        return;
+      }
+    }
+
+    board[row][col]=n;
+    notes[row][col].clear();
+    clearRelatedNotes(row,col,n);
+
+    const completed = isCorrect ? getCompletedGroups(row, col) : new Set();
+
+    render();
+    updateProgress();
+    if (completed.size > 0) flashGroups(completed);
+    checkWin();
+  }
+
+  function clearRelatedNotes(r,c,n) {
+    for (let i=0;i<9;i++) { notes[r][i].delete(n); notes[i][c].delete(n); }
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for (let i=br;i<br+3;i++) for (let j=bc;j<bc+3;j++) notes[i][j].delete(n);
+  }
+
+  function toggleNotes() {
+    notesMode=!notesMode;
+    document.getElementById('notesBtn').classList.toggle('active',notesMode);
+  }
+
+  function getHint() {
+    const cells=[];
+    for (let r=0;r<9;r++) for (let c=0;c<9;c++) if (board[r][c]===0) cells.push([r,c]);
+    if (!cells.length) return;
+    const [r,c]=cells[Math.floor(Math.random()*cells.length)];
+    board[r][c]=solution[r][c];
+    notes[r][c].clear();
+    clearRelatedNotes(r,c,solution[r][c]);
+    selected={row:r,col:c};
+
+    const completed = getCompletedGroups(r, c);
+
+    render();
+    updateProgress();
+
+    const idx=r*9+c;
+    const el=document.getElementById('grid').children[idx];
+    if (el) { el.classList.add('hint-flash'); setTimeout(()=>el.classList.remove('hint-flash'),600); }
+
+    if (completed.size > 0) setTimeout(()=>flashGroups(completed), 200);
+    checkWin();
+  }
+
+  function checkWin() {
+    if (board.every((row,r)=>row.every((v,c)=>v===solution[r][c]))) {
+      clearInterval(timerInterval);
+
+      const best = getBest();
+      let isNewBest = false;
+      if (best === null || seconds < best) {
+        saveBest(seconds);
+        isNewBest = true;
+        updateBestDisplay();
+      }
+
+      document.getElementById('winStats').textContent = `${fmtTime(seconds)} · 실수 ${mistakes}회`;
+      document.getElementById('winBest').textContent =
+        isNewBest ? '🏆 신기록!' : `베스트: ${fmtTime(getBest())}`;
+
+      setTimeout(()=>document.getElementById('winOverlay').classList.add('show'),300);
+    }
+  }
+
+  function hasConflict(r,c) {
+    const v=board[r][c]; if (!v) return false;
+    for (let i=0;i<9;i++) { if(i!==c&&board[r][i]===v) return true; if(i!==r&&board[i][c]===v) return true; }
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for (let i=br;i<br+3;i++) for (let j=bc;j<bc+3;j++) if((i!==r||j!==c)&&board[i][j]===v) return true;
+    return false;
+  }
+
+  // ── Render ─────────────────────────────────────────
+
+  function render() {
+    const grid=document.getElementById('grid');
+    grid.innerHTML='';
+    const selNum=selected?board[selected.row][selected.col]:0;
+
+    for (let r=0;r<9;r++) {
+      for (let c=0;c<9;c++) {
+        const cell=document.createElement('div');
+        cell.className='cell';
+        cell.dataset.row=r; cell.dataset.col=c;
+
+        const bRow=Math.floor(r/3), bCol=Math.floor(c/3);
+        if ((bRow+bCol)%2===1) cell.classList.add('box-dark');
+
+        if (selected) {
+          if (selected.row===r && selected.col===c) cell.classList.add('selected');
+          else if (selected.row===r || selected.col===c ||
+            (Math.floor(selected.row/3)===Math.floor(r/3) && Math.floor(selected.col/3)===Math.floor(c/3)))
+            cell.classList.add('highlight');
+        }
+
+        const v=board[r][c];
+        if (selNum&&v===selNum&&!(selected&&selected.row===r&&selected.col===c))
+          cell.classList.add('same-num');
+
+        if (v!==0) {
+          if (hasConflict(r,c)) cell.classList.add('conflict');
+          else if (given[r][c]) cell.classList.add('given');
+          else cell.classList.add('user-input');
+          cell.textContent=v;
+        } else if (notes[r][c].size>0) {
+          const ng=document.createElement('div'); ng.className='notes-grid';
+          for (let n=1;n<=9;n++) {
+            const nd=document.createElement('div'); nd.className='note';
+            nd.textContent=notes[r][c].has(n)?n:''; ng.appendChild(nd);
+          }
+          cell.appendChild(ng);
+        }
+
+        cell.addEventListener('click',()=>selectCell(r,c));
+        grid.appendChild(cell);
+      }
+    }
+  }
+
+  // Keyboard
+  document.addEventListener('keydown',e=>{
+    if (!selected) return;
+    if (e.key>='1'&&e.key<='9') { e.preventDefault(); inputNum(parseInt(e.key)); }
+    else if (e.key==='Backspace'||e.key==='Delete'||e.key==='0') inputNum(0);
+    else if (e.key==='ArrowUp'    && selected.row>0) { selected.row--; render(); }
+    else if (e.key==='ArrowDown'  && selected.row<8) { selected.row++; render(); }
+    else if (e.key==='ArrowLeft'  && selected.col>0) { selected.col--; render(); }
+    else if (e.key==='ArrowRight' && selected.col<8) { selected.col++; render(); }
+  });
+
+  newGame();
+</script>
+</body>
+</html>

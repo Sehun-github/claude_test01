@@ -1,0 +1,3247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>소방기술사 모의시험</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f5f5f0;
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* ── 인쇄 스타일 ── */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+      .sheet { box-shadow: none; margin: 0; }
+      .answer-box textarea { border: 1px solid #999 !important; }
+      .model-answer { display: none !important; }
+    }
+
+    /* ── 헤더 ── */
+    .exam-header {
+      background: #1a1a2e;
+      color: white;
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .exam-header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .exam-header .sub {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* 타이머 */
+    #timer {
+      background: #0f3460;
+      border: 1px solid #e94560;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      color: #e94560;
+      letter-spacing: 0.1em;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    #timer.warning { color: #f59e0b; border-color: #f59e0b; }
+    #timer.danger  { color: #ef4444; border-color: #ef4444; animation: blink 1s infinite; }
+
+    @keyframes blink { 50% { opacity: 0.5; } }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: #e94560; color: white; }
+    .btn-primary:hover { background: #c73652; }
+    .btn-secondary { background: #2a2a45; color: #ccc; }
+    .btn-secondary:hover { background: #3a3a60; color: white; }
+    .btn-outline { background: transparent; color: #aaa; border: 1px solid #444; }
+    .btn-outline:hover { background: #1e1e30; color: white; }
+
+    /* ── 시험지 본문 ── */
+    .sheet {
+      max-width: 860px;
+      margin: 32px auto;
+      background: white;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* 시험지 상단 정보 */
+    .exam-info {
+      border-bottom: 3px double #1a1a2e;
+      padding: 24px 48px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .exam-info .title-block h2 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: #1a1a2e;
+    }
+
+    .exam-info .title-block .notice {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .score-table {
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .score-table th, .score-table td {
+      border: 1px solid #aaa;
+      padding: 5px 12px;
+      text-align: center;
+    }
+
+    .score-table th { background: #f0f0f0; }
+
+    .name-row {
+      display: flex;
+      gap: 24px;
+      padding: 12px 48px;
+      border-bottom: 1px solid #ddd;
+      background: #fafafa;
+      font-size: 0.85rem;
+      color: #444;
+    }
+
+    .name-row .field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .name-row input {
+      border: none;
+      border-bottom: 1px solid #999;
+      background: transparent;
+      padding: 2px 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      width: 120px;
+      outline: none;
+    }
+
+    /* ── 문제 영역 ── */
+    .questions {
+      padding: 32px 48px;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #888;
+      text-transform: uppercase;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+    }
+
+    .question-block {
+      margin-bottom: 40px;
+    }
+
+    .q-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .q-number {
+      background: #1a1a2e;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-right: 10px;
+    }
+
+    .q-text {
+      flex: 1;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: #1a1a1a;
+    }
+
+    .q-text strong {
+      color: #1a1a2e;
+    }
+
+    .q-points {
+      font-size: 0.75rem;
+      color: #e94560;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-left: 12px;
+      background: #fff0f3;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #fcc;
+    }
+
+    .sub-questions {
+      margin: 8px 0 8px 38px;
+      list-style: none;
+    }
+
+    .sub-questions li {
+      font-size: 0.9rem;
+      color: #333;
+      padding: 2px 0;
+    }
+
+    .sub-questions li::before {
+      content: attr(data-label);
+      color: #1a1a2e;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    /* 답안 작성란 */
+    .answer-box {
+      margin-top: 12px;
+    }
+
+    .answer-box label {
+      font-size: 0.75rem;
+      color: #999;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .answer-box textarea {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      padding: 14px 16px;
+      font-family: 'Malgun Gothic', sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.9;
+      resize: vertical;
+      outline: none;
+      color: #1a1a1a;
+      background: #fdfdfd;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .answer-box textarea:focus {
+      border-color: #1a1a2e;
+      box-shadow: 0 0 0 3px rgba(26,26,46,0.08);
+      background: white;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.72rem;
+      color: #bbb;
+      margin-top: 3px;
+    }
+
+    /* 모범 답안 */
+    .model-answer {
+      display: none;
+      margin-top: 12px;
+      background: #f0f7ff;
+      border-left: 4px solid #1a1a2e;
+      border-radius: 0 6px 6px 0;
+      padding: 16px 20px;
+    }
+
+    .model-answer.show { display: block; }
+
+    .model-answer .ma-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .model-answer .ma-content {
+      font-size: 0.88rem;
+      line-height: 2;
+      color: #1a1a2e;
+      white-space: pre-line;
+    }
+
+    .model-answer .ma-content .keyword {
+      background: #dbeafe;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* 최종 점수 오버레이 */
+    .score-badge {
+      display: inline-block;
+      font-size: 3rem;
+      font-weight: 900;
+      color: #e94560;
+      margin: 8px 0;
+    }
+
+    /* 구분선 */
+    .divider {
+      border: none;
+      border-top: 1px dashed #ddd;
+      margin: 32px 0;
+    }
+
+    /* 하단 제출 영역 */
+    .submit-area {
+      background: #fafafa;
+      border-top: 1px solid #eee;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .submit-area .progress {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .submit-area .progress strong {
+      color: #1a1a2e;
+    }
+
+    .btn-group { display: flex; gap: 10px; }
+
+    /* 결과 오버레이 */
+    #result-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #result-overlay.show { display: flex; }
+
+    .result-box {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 48px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .result-box h2 { font-size: 1.3rem; margin-bottom: 8px; color: #1a1a2e; }
+    .result-box .result-time { font-size: 2.5rem; font-weight: 900; color: #e94560; margin: 16px 0; }
+    .result-box p { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
+
+    /* 교시 선택 */
+    .session-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 48px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ddd;
+      flex-wrap: wrap;
+    }
+
+    .session-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      color: #555;
+      transition: all 0.15s;
+    }
+
+    .session-btn.active {
+      background: #1a1a2e;
+      color: white;
+      border-color: #1a1a2e;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<div class="exam-header no-print">
+  <div>
+    <h1>소방기술사 모의시험</h1>
+    <div class="sub">Fire Protection Professional Engineer — Practice Exam</div>
+  </div>
+  <div class="header-right">
+    <div id="timer">100:00</div>
+    <button class="btn btn-secondary no-print" onclick="toggleTimer()">⏸ 일시정지</button>
+    <button class="btn btn-outline no-print" onclick="window.print()">🖨 인쇄</button>
+  </div>
+</div>
+
+<!-- 시험지 -->
+<div class="sheet">
+
+  <!-- 시험 정보 -->
+  <div class="exam-info">
+    <div class="title-block">
+      <h2>소방기술사 기출 유형 모의시험</h2>
+      <div class="notice">
+        · 각 문항에 대해 논리적이고 체계적으로 서술하시오.<br>
+        · 단위, 수식, 관련 법령 및 기준을 명시하면 가점됩니다.<br>
+        · 답안 작성 후 하단 [모범답안 확인] 버튼으로 채점하세요.
+      </div>
+    </div>
+    <table class="score-table">
+      <tr><th>교시</th><th>문항수</th><th>배점</th><th>시간</th></tr>
+      <tr><td>1교시</td><td>4문항</td><td>각 25점</td><td>100분</td></tr>
+    </table>
+  </div>
+
+  <!-- 수험자 정보 -->
+  <div class="name-row no-print">
+    <div class="field">수험번호 <input type="text" placeholder=""></div>
+    <div class="field">성&nbsp;&nbsp;&nbsp;&nbsp;명 <input type="text" placeholder=""></div>
+    <div class="field">응시일 <input type="text" id="exam-date" placeholder=""></div>
+  </div>
+
+  <!-- 교시 선택 -->
+  <div class="session-bar no-print">
+    <span style="font-size:0.8rem;color:#888;line-height:28px;">문제 세트:</span>
+    <button class="session-btn active" onclick="loadSet(0, this)">세트 1 — 소화설비</button>
+    <button class="session-btn" onclick="loadSet(1, this)">세트 2 — 화재공학</button>
+    <button class="session-btn" onclick="loadSet(2, this)">세트 3 — 제연·피난</button>
+    <button class="session-btn" onclick="loadSet(3, this)">세트 4 — 위험물·전기</button>
+  </div>
+
+  <!-- 문제 영역 -->
+  <div class="questions" id="questions-container">
+    <!-- JS로 렌더링 -->
+  </div>
+
+  <!-- 하단 버튼 -->
+  <div class="submit-area no-print">
+    <div class="progress">
+      작성 문항: <strong id="answered-count">0</strong> / <strong id="total-count">4</strong>
+    </div>
+    <div class="btn-group" style="align-items:center;">
+      <button class="btn btn-secondary" onclick="toggleAnswers()">📋 모범답안 확인</button>
+      <button class="btn btn-primary" onclick="submitExam()">시험 종료 및 제출</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결과 오버레이 -->
+<div id="result-overlay">
+  <div class="result-box">
+    <h2>시험 종료</h2>
+    <div class="result-time" id="result-time">—</div>
+    <p>작성한 답안을 검토하고 모범답안과 비교해 보세요.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="closeResult()">답안 검토</button>
+      <button class="btn btn-primary" onclick="showAnswers()">모범답안 보기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────
+//  문제 데이터베이스
+// ─────────────────────────────────────────────────
+const QUESTION_SETS = [
+
+  // ── 세트 1: 소화설비 ──────────────────────────
+  [
+    {
+      number: 1, points: 25,
+      text: `스프링클러설비의 <strong>습식·건식·준비작동식·일제살수식</strong> 4가지 방식에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '각 방식의 작동 원리 및 구성 요소' },
+        { label: '(2)', text: '각 방식의 적용 장소 및 선정 기준' },
+        { label: '(3)', text: '습식과 건식의 헤드 개방 후 방수까지의 시간 차이가 발생하는 이유와 이를 보완하기 위한 설비' },
+      ],
+      answer: `【1】 스프링클러설비 방식별 비교
+
+(1) 작동 원리 및 구성 요소
+
+① 습식(Wet Pipe)
+ - 배관 내에 항상 가압수가 충전된 상태 유지
+ - 헤드 감열부 용해 → 즉시 방수
+ - 구성: 알람밸브(습식 유수검지장치), 가압송수장치, 헤드
+
+② 건식(Dry Pipe)
+ - 배관 내 압축공기(또는 질소) 충전
+ - 헤드 개방 → 공기 배출 → 드라이밸브 개방 → 방수
+ - 구성: 드라이밸브, 공기압축기, 가속기(Accelerator/Exhauster)
+ - 방수 지연: 헤드 개방 후 60초 이내 방수 기준(NFPA)
+
+③ 준비작동식(Pre-Action)
+ - 배관 내 저압 공기 또는 대기압 상태
+ - 감지기 작동 → 준비작동밸브 개방 → 헤드 개방 시 방수
+ - 2중 안전장치(감지기 + 헤드) → 오방수 방지
+ - 구성: 준비작동식 유수검지장치, 화재감지기(교차회로)
+
+④ 일제살수식(Deluge)
+ - 개방형 헤드 사용, 배관 내 물 없음
+ - 감지기 작동 → 델류지밸브 개방 → 전 헤드 일제 방수
+ - 구성: 델류지밸브, 개방형 헤드, 화재감지기
+
+(2) 적용 장소 및 선정 기준
+
+ · 습식: 동결 우려 없는 일반 장소 (사무실, 백화점 등) — 가장 신뢰성 높고 경제적
+ · 건식: 동결 위험 장소 (주차장 옥외, 냉동창고 인근) — 충전 공기가 단열막 역할
+ · 준비작동식: 전산실, 박물관 등 수손(水損) 피해 우려 장소 — 오방수 방지 최우선
+ · 일제살수식: 화재 급속 확산 우려 장소 (항공기 격납고, 무대부, 위험물 저장소)
+
+(3) 건식과 습식의 방수 시간 차이 원인 및 보완
+
+▶ 원인
+ · 건식은 헤드 개방 후 배관 내 충전 공기가 완전히 배출될 때까지 물이 도달하지 못함
+ · 배관 용적이 클수록, 배관 길이가 길수록 지연 시간 증가
+
+▶ 보완 설비
+ · 가속기(Accelerator): 드라이밸브 중간체임버로 공기를 신속 유도, 밸브 조기 개방
+ · 배기장치(Exhauster): 배관 내 공기를 강제 배출하여 방수 시간 단축
+ · Quick-Opening Device(QOD): 가속기와 배기장치의 총칭
+ → NFPA 13 기준: 가장 먼 헤드까지 방수 시간 60초 이내`
+    },
+    {
+      number: 2, points: 25,
+      text: `포소화설비(Foam Extinguishing System)에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '포의 소화 원리 3가지 (질식, 냉각, 유화)를 설명하시오.' },
+        { label: '(2)', text: '포 혼합방식(프로포셔너 방식) 4가지의 원리와 특징을 비교하시오.' },
+        { label: '(3)', text: '고발포와 저발포의 팽창비 기준 및 적용 장소를 설명하시오.' },
+      ],
+      answer: `【2】 포소화설비
+
+(1) 포의 소화 원리
+
+① 질식 효과 (주된 소화 원리)
+ · 포 층이 연소면을 덮어 공기(산소) 공급 차단
+ · 팽창비가 높을수록 두꺼운 포 층 형성 → 질식 효과 증대
+
+② 냉각 효과
+ · 포에 함유된 수분이 증발하면서 열 흡수
+ · 수성막포(AFFF)의 경우 얇은 수막층 형성으로 냉각 효과 보완
+
+③ 유화 효과 (에멀션화)
+ · 포제가 가연성 액체 표면에 유화층 형성
+ · 가연성 증기 발생 억제 — 특히 알코올형 포에서 중요
+ · 수용성 위험물(알코올, 케톤류)에는 내알코올포 사용 필요
+
+(2) 포 혼합방식 4가지 비교
+
+① 라인 프로포셔너(Line Proportioner / 관로혼합방식)
+ · 벤투리 효과를 이용, 포 원액을 흡입·혼합
+ · 구조 간단, 설치비 저렴 / 압력손실 크고 혼합비율 불안정
+ · 소규모, 이동식 설비에 적합
+
+② 프레셔 프로포셔너(Pressure Proportioner / 압력혼합방식)
+ · 격막식 탱크(Bladder Tank) 또는 압력탱크에 포원액 충전
+ · 수압으로 포원액 압출하여 혼합
+ · 혼합비율 안정적 / 포원액 탱크 별도 필요
+
+③ 프레셔 사이드 프로포셔너(Pressure Side Proportioner / 펌프 프로포셔너)
+ · 포원액 펌프가 직접 포원액을 가압 주입
+ · 혼합비율 정확, 장거리 이송 가능 / 포원액 펌프 별도 필요
+ · 대용량 고정식 설비(위험물 저장탱크)에 적합
+
+④ 어라운드 더 펌프 프로포셔너(Around-the-Pump Proportioner)
+ · 주펌프 토출측과 흡입측 사이 바이패스관에 프로포셔너 설치
+ · 구조 간단 / 펌프 압력 변동 시 혼합비율 영향 받음
+
+(3) 고발포·저발포 팽창비 및 적용 장소
+
+ 팽창비(Expansion Ratio) = 발생 포 부피 ÷ 포수용액 부피
+
+ · 저발포: 팽창비 20 미만 (일반적으로 6~10배)
+   → 주차장, 항공기 격납고, 유류 탱크 지붕 등 개방 공간
+   → 유면 밀착성 우수, 바람에 강함
+
+ · 고발포: 팽창비 80 이상 ~ 1,000 이하
+   → 지하층, 선박 기관실, 케이블트레이실 등 밀폐 공간
+   → 공간을 포로 충전하여 산소 차단
+   → 팽창비 80~200: 중발포(Medium Expansion)로 분류하기도 함
+
+※ NFPA 11 기준: Low expansion < 20, Medium 20~200, High > 200`
+    },
+    {
+      number: 3, points: 25,
+      text: `옥내소화전설비의 수리계산(Hydraulic Calculation)에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '가압송수장치의 양정(H) 산정 공식을 쓰고 각 항의 의미를 설명하시오.' },
+        { label: '(2)', text: '체절운전, 정격운전, 최고사용압력의 의미와 펌프 성능 시험 기준을 설명하시오.' },
+        { label: '(3)', text: '캐비테이션(Cavitation) 발생 원인, 영향, 방지 대책을 설명하시오.' },
+      ],
+      answer: `【3】 옥내소화전설비 수리계산
+
+(1) 가압송수장치 양정 산정
+
+ H = h₁ + h₂ + h₃ + 17(m)   [소방청 고시]
+
+ · H  : 펌프의 전양정 [m]
+ · h₁ : 소방호스의 마찰손실수두 [m]
+       → 호스 구경, 길이, 유량에 따른 하젠-윌리엄스 공식 적용
+ · h₂ : 배관 및 관부속품의 마찰손실수두 [m]
+       → 등가길이(Equivalent Length) 방법 또는 직접 계산
+ · h₃ : 낙차(실양정) [m]
+       → 수원 수면에서 최고층 방수구까지의 수직거리
+ · 17m : 방수구에서의 최소 방수압력 0.17 MPa에 해당하는 수두
+
+ ※ 방수압 범위: 0.17 MPa 이상 ~ 0.7 MPa 이하
+    방수량: 130 ℓ/min 이상 (30층 이상: 호스릴형 60 ℓ/min 이상)
+
+(2) 운전 특성 및 성능 시험 기준
+
+① 체절운전(Shut-off)
+ · 토출측 밸브 완전 폐쇄 시의 운전 상태 (유량 = 0)
+ · 이때의 압력: 체절압력 → 정격양정의 140% 이하이어야 함
+ · 장시간 체절운전 시 펌프 과열 → 릴리프밸브로 순환 방지
+
+② 정격운전(Rated)
+ · 정격 토출량(100%), 정격 양정(100%)에서의 운전
+ · 이때 전동기가 과부하 없이 연속 운전 가능해야 함
+
+③ 최고사용압력
+ · 배관계에서 허용하는 최대 사용 압력
+ · 체절압력이 최고사용압력을 초과하지 않도록 설계
+ · KS B 6301: 소방펌프 성능 기준 적용
+
+▶ 성능 시험 기준 (「소화설비의 성능인증 및 제품검사의 기술기준」)
+ · 정격 토출량의 150% 운전 시: 정격양정의 65% 이상
+ · 체절 운전 시: 정격양정의 140% 이하
+
+(3) 캐비테이션(Cavitation)
+
+▶ 발생 원인
+ · 펌프 흡입측 압력이 유체의 증기압 이하로 떨어질 때 발생
+ · 원인: 흡입양정 과대, 흡입관 마찰손실 과대, 유체 온도 상승,
+         흡입관 밸브 과도 조임, 회전수 과대
+
+▶ 영향
+ · 소음·진동 발생 (기포 붕괴 시 충격파)
+ · 임펠러·펌프 케이싱 침식(Erosion) — 점진적 손상
+ · 양정·유량 저하 → 소화 성능 저하
+ · 심할 경우 펌프 운전 불능
+
+▶ 방지 대책
+ · 가용 유효흡입수두(NPSHA) > 필요 유효흡입수두(NPSHR)이 되도록 설계
+ · 흡입양정 최소화: 수원을 펌프와 같은 층 또는 하부에 배치
+ · 흡입관 관경 증대, 굴곡부·밸브 수 최소화
+ · 펌프 회전수 저감, 양흡입형 펌프 채택
+ · 인듀서(Inducer) 설치`
+    },
+    {
+      number: 4, points: 25,
+      text: `이산화탄소소화설비(CO₂ Extinguishing System)와 할론 대체 청정소화약제에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: 'CO₂소화약제의 소화 원리, 장단점, 인명 안전 대책을 설명하시오.' },
+        { label: '(2)', text: '전역방출방식의 설계농도 산정 방법 (기본 공식 포함)을 설명하시오.' },
+        { label: '(3)', text: 'HFC계·FK계·불활성기체계 청정소화약제의 특성을 비교하고 각각의 대표 약제를 설명하시오.' },
+      ],
+      answer: `【4】 이산화탄소소화설비 및 청정소화약제
+
+(1) CO₂ 소화 원리, 장단점, 인명 안전 대책
+
+▶ 소화 원리
+ · 질식 소화 주체: 공기 중 O₂ 농도를 15% 이하로 희석
+ · 냉각 효과: 기화 시 드라이아이스(-78.5℃) 형성, 흡열 반응
+ · 설계농도: 일반 가연물 34%, 전기설비 50%, 유류 34~50%
+
+▶ 장점
+ · 소화 후 잔류물 없음 → 전기실, 통신실 수손 피해 없음
+ · 전기 비전도성, 부식성 없음
+ · 저장 안정성 우수 (고압 액화 저장)
+ · 가격 저렴, 대량 확보 용이
+
+▶ 단점
+ · 질식 위험: CO₂ 9% 이상 시 의식불명, 20% 이상 사망
+ · 심부화재(Deep-seated Fire)에는 효과 불충분
+ · 방호구역 밀폐 유지 필수 (방사 후 누설 주의)
+ · 냉각 효과로 전기·전자 장비 온도 급변 충격 가능성
+
+▶ 인명 안전 대책
+ · 방사 전 경보(사이렌), 음성 경보 의무화 (방사 20초 전 이상)
+ · 비상 정지 스위치(수동 기동 정지 장치) 설치
+ · 방호구역 출입문에 "CO₂ 소화설비 경고" 표지판
+ · 방호구역 내 인원 대피 확인 절차 수립
+ · 자동기동 방식: 감지기 2개 회로(교차회로) 동시 작동
+
+(2) 전역방출방식 설계농도 산정
+
+ 기본 공식 (NFPA 12, 소방청 고시):
+
+   W = V × (C/(100-C)) × (1/S)
+
+ · W : 소화약제 소요량 [kg]
+ · V : 방호구역 체적 [m³]
+ · C : 설계농도 [%] (일반 가연물 34%, 안전율 적용 시 40%)
+ · S : 소화약제 비체적 [m³/kg]
+     CO₂의 경우 21℃, 101.3 kPa에서 S = 0.56 m³/kg
+
+ ▶ 개구부 가산량
+  · 방호구역 개구부(자동 폐쇄 불가)가 있을 경우 추가 약제 필요
+  · 가산량 = 개구부 면적[m²] × 5 [kg/m²]
+
+ ▶ 설계농도 안전율
+  · 가연물별 최소 소화농도 × 1.2 (20% 안전율 적용)
+
+(3) 청정소화약제 비교
+
+① HFC계 (Hydrofluorocarbon)
+ · 대표 약제: HFC-23(FE-13), HFC-227ea(FM-200), HFC-125
+ · 소화 원리: 열 흡수에 의한 냉각 + 연쇄반응 억제 (일부)
+ · ODP(오존파괴지수) = 0, GWP(지구온난화지수) 높음 (HFC-227ea: 3,220)
+ · 설계농도: HFC-227ea 기준 7~8% 내외
+ · 적용: 전산실, 박물관, 통신실 등 (현재 환경 규제 강화 추세)
+
+② FK계 (Fluoroketone)
+ · 대표 약제: FK-5-1-12 (Novec 1230)
+ · 소화 원리: 냉각 소화 주체 (표면 기화 시 대량 흡열)
+ · ODP = 0, GWP = 1 (매우 낮음), 대기 체류 시간 5일
+ · 설계농도: 4.2~5.9%로 낮음 → 인명 안전성 우수
+ · 친환경 대표 약제로 각광
+
+③ 불활성기체계 (Inert Gas)
+ · 대표 약제: IG-541(Inergen: N₂52%+Ar40%+CO₂8%), IG-55, IG-100
+ · 소화 원리: 순수 질식 소화 (O₂ 농도 12.5~15%로 희석)
+ · ODP = 0, GWP ≈ 0 → 가장 친환경적
+ · 고압 저장(150~300 bar) 필요, 저장 용적 크고 설치비 고가
+ · 방호구역 밀폐도 특히 중요 (농도 유지)
+ · O₂ 13% 이상 유지 → 인명 안전성 확보 (사람 체류 허용 농도)`
+    },
+    {
+      number: 5, points: 25,
+      text: `<strong>미분무소화설비(Water Mist System)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '미분무수의 소화 원리 및 스프링클러설비와의 차이점을 설명하시오.' },
+        { label: '(2)', text: '미분무소화설비의 분류(저압·중압·고압, 단일유체·이중유체)를 설명하시오.' },
+        { label: '(3)', text: '미분무소화설비의 적용 장소 및 설계 시 고려사항을 설명하시오.' },
+      ],
+      answer: `【5】 미분무소화설비
+
+(1) 소화 원리 및 스프링클러와 차이점
+
+▶ 미분무수 정의
+ · NFPA 750: 최소작동압력에서 측정거리 1m 지점에서 누적 체적분포의 99%가 1,000 μm 이하인 물 입자
+
+▶ 소화 원리 (복합 메커니즘)
+ ① 냉각: 미세 액적의 큰 표면적 → 빠른 기화·흡열 (주된 소화 원리)
+ ② 질식: 수증기 팽창으로 O₂ 희석 (체적 1,700배 팽창)
+ ③ 복사열 차단: 수막이 화원의 복사열 흡수·산란
+
+▶ 스프링클러와 비교
+ 구분         │ 스프링클러       │ 미분무
+ ─────────────┼──────────────────┼──────────────────
+ 액적 크기    │ 1,000 μm 이상   │ 1,000 μm 이하
+ 방수량       │ 80 ℓ/min/헤드  │ 5~15 ℓ/min/헤드
+ 수손 피해    │ 큼               │ 매우 적음
+ 작동 압력    │ 0.1~1.2 MPa     │ 0.35~35 MPa
+ 침투성       │ 심부화재 가능    │ 밀폐 공간 유리
+
+(2) 미분무소화설비 분류
+
+▶ 압력에 의한 분류
+ · 저압(Low Pressure): ≤ 1.2 MPa — 기존 배관 활용 가능, 입자 크기 비교적 큼
+ · 중압(Intermediate): 1.2~3.4 MPa
+ · 고압(High Pressure): > 3.4 MPa — 입자 극히 미세, 소화 효율 최대, 전용 배관 필요
+
+▶ 유체 방식에 의한 분류
+ · 단일유체(Single Fluid): 물만 사용, 노즐에서 미세화
+   → 구조 단순, 유지보수 용이
+ · 이중유체(Twin Fluid): 물 + 압축공기/질소 혼합
+   → 더 미세한 액적 형성, 소화 효율 우수, 시스템 복잡
+
+(3) 적용 장소 및 설계 고려사항
+
+▶ 적용 장소
+ · 기관실, 선박 엔진룸 (IMO 승인 필수)
+ · 터널, 지하 주차장
+ · 문화재, 박물관 (수손 피해 최소화)
+ · 전산실, 의료시설 (정밀 기기 보호)
+ · 주방 후드 (K급 소화)
+
+▶ 설계 고려사항
+ · 환기 조건: 밀폐도가 높을수록 질식 효과 증대 → 개구부 제어 필요
+ · 장애물: 선반·장비가 미분무 분포 방해 → 노즐 배치 최적화
+ · 수질: 고압 노즐 막힘 방지 → 여과기 설치, 수질 관리 필수
+ · 시험 성능: NFPA 750 또는 FM 5560 기준 화재 시험 합격 제품 사용
+ · 동결 방지: 저압·중압은 습식 적용 가능, 고압은 질소 가압 건식 고려`
+    },
+    {
+      number: 6, points: 25,
+      text: `<strong>분말소화설비(Dry Chemical Extinguishing System)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '분말소화약제의 종류(제1종~제4종)와 각각의 소화 원리를 설명하시오.' },
+        { label: '(2)', text: '분말소화설비의 가압방식(가압식·축압식)을 비교 설명하시오.' },
+        { label: '(3)', text: '분말소화설비의 설치 기준 및 방호면적 산정 방법을 설명하시오.' },
+      ],
+      answer: `【6】 분말소화설비
+
+(1) 분말소화약제 종류 및 소화 원리
+
+① 제1종 분말 (탄산수소나트륨, NaHCO₃) — 백색
+ · 적응 화재: B급(유류), C급(전기)
+ · 소화 원리: 열분해 시 CO₂·수증기 발생 → 질식, 냉각
+   2NaHCO₃ → Na₂CO₃ + H₂O + CO₂
+ · 부촉매 효과(연쇄반응 억제)
+
+② 제2종 분말 (탄산수소칼륨, KHCO₃) — 자색(보라)
+ · 적응 화재: B급, C급
+ · 소화 효과: 제1종보다 약 2배 우수
+ · 2KHCO₃ → K₂CO₃ + H₂O + CO₂
+
+③ 제3종 분말 (제1인산암모늄, NH₄H₂PO₄) — 담홍색(분홍)
+ · 적응 화재: A·B·C급 (ABC 분말) — 가장 광범위
+ · A급 소화: 열분해 시 메타인산(HPO₃) 생성 → 가연물 표면 피막 형성 → 차연·질식
+ · B·C급: 연쇄반응 억제
+
+④ 제4종 분말 (탄산수소칼륨+요소 화합물) — 회색
+ · 적응 화재: B급, C급
+ · 소화 효과: 제2종의 약 2배, 가장 강력
+ · 주로 고가 특수 장소
+
+(2) 가압방식 비교
+
+ 구분         │ 가압식(Stored Pressure)        │ 축압식(Cartridge)
+ ─────────────┼────────────────────────────────┼───────────────────────────
+ 가압원       │ 질소가스 별도 용기(가압용 가스) │ 용기 내 질소 충전(상시 가압)
+ 작동 방식   │ 기동 시 가스 밸브 개방 후 방사  │ 레버 조작 즉시 방사 가능
+ 방사 압력    │ 기동 후 압력 상승 시간 필요     │ 즉시 안정적 방사
+ 점검         │ 가압 가스 압력 별도 확인 필요   │ 압력 게이지로 상시 확인 가능
+ 적용         │ 고정식 대형 설비                │ 이동식·소형 설비
+
+(3) 설치 기준 및 방호면적 산정
+
+▶ 전역방출방식 약제량
+ · 소화약제량[kg] = 방호구역 체적[m³] × 약제량[kg/m³]
+ · 제3종 기준: 0.36 kg/m³ (차고·주차장), 0.6 kg/m³ (기타)
+ · 개구부 가산량: 개구부 면적[m²] × 2.7 kg/m²
+
+▶ 국소방출방식
+ · 소화면적[m²] × 단위면적당 약제량[kg/m²]
+ · 면적방식: 방호 대상물 최대 면적 기준
+ · 체적방식: 방호 대상물 체적 × 계수
+
+▶ 설치 기준
+ · 소화약제 저장 용기: 온도 40℃ 이하, 방습 조치
+ · 선택밸브: 방호구역마다 설치
+ · 방사 시간: 30초 이내 방사 완료
+ · 안전밸브: 최고사용압력 1.1배에서 작동`
+    },
+    {
+      number: 7, points: 25,
+      text: `<strong>옥내소화전설비의 배관 및 밸브류</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '배관의 종류 및 재질 기준, 관이음쇠 종류를 설명하시오.' },
+        { label: '(2)', text: '소화설비 배관에 설치하는 밸브류(OS&Y, 버터플라이, 체크밸브, 릴리프밸브)의 용도와 특성을 설명하시오.' },
+        { label: '(3)', text: '배관의 동결 방지 대책과 워터해머(Water Hammer) 방지 방법을 설명하시오.' },
+      ],
+      answer: `【7】 옥내소화전설비 배관 및 밸브류
+
+(1) 배관 종류 및 재질 기준
+
+▶ 배관 재질 (NFTC 102 기준)
+ · 배관용 탄소강관 (KS D 3507): 일반 배관 — 가장 널리 사용
+ · 압력배관용 탄소강관 (KS D 3562): 고압 구간 (압력 1.2 MPa 초과)
+ · 이음매 없는 동·동합금관: 소규모 설비
+ · 합성수지관: 배관 내 물이 항상 채워진 부분(습식), 지하 매설
+ · 스테인리스강관 (KS D 3576, 3595): 내식성 요구 장소
+
+▶ 관이음쇠 종류
+ · 나사식 이음: 소구경(50 mm 이하), 시공 간편
+ · 용접 이음: 중·대구경, 누수 위험 최소
+ · 그루브(홈) 이음(Groove Coupling): 신속 시공, 지진 등 진동 흡수
+ · 플랜지 이음: 대구경, 펌프·밸브 연결, 분해 점검 용이
+
+(2) 밸브류 종류 및 특성
+
+① OS&Y 밸브 (Outside Screw and Yoke, 개폐표시형)
+ · 스핀들(나사)이 외부로 돌출 → 개폐 상태 육안 확인 가능
+ · 소방용 개폐 밸브의 표준 → 상시 개방 위치 잠금(Lock-open) 필수
+ · 수계 소화설비 주요 위치에 설치 의무
+
+② 버터플라이 밸브 (Butterfly Valve)
+ · 원판형 디스크 회전으로 개폐 → 구조 간단, 소형 경량
+ · 개폐 상태 표시 기능 필수 (Tamper Switch 연동)
+ · 완전 개방 시 압력손실 적음
+
+③ 체크밸브 (Check Valve, 역류방지밸브)
+ · 유체 역류 방지 — 펌프 토출측, 수원 연결부에 설치
+ · 종류: 스윙형(저압력손실), 리프트형(수직 배관 적합), 웨이퍼형
+ · 펌프 토출측: 체절 운전 시 압력 역류 방지
+
+④ 릴리프밸브 (Relief Valve, 안전밸브)
+ · 배관 내 압력이 설정값 초과 시 자동 개방 → 압력 방출
+ · 체절 운전 시 펌프 과열 방지용 순환 배관에 설치
+ · 설정압력: 펌프 체절압력 이하로 조정
+
+(3) 동결 방지 대책 및 워터해머 방지
+
+▶ 동결 방지 대책
+ · 보온재 설치: 유리면, 폴리우레탄폼 등 단열재 피복
+ · 열선(Heat Trace) 설치: 외부 노출 배관에 전기 열선 적용
+ · 물 순환 방식: 펌프 소량 순환 운전으로 정체수 방지
+ · 드레인밸브: 동절기 사용 중단 시 배수 처리
+ · 건식 배관 적용: 동결 위험 구역은 공기 충전 건식으로 변경
+
+▶ 워터해머(수격) 방지
+ · 원인: 밸브 급격한 개폐, 펌프 급정지 → 유속 급변 → 충격파 발생
+ · 영향: 배관 진동·소음, 이음부 누수, 기기 손상
+ · 방지 대책
+   - 밸브 천천히 개폐 (개폐 시간 충분히 확보)
+   - 에어챔버(Air Chamber) 설치: 공기 쿠션 역할
+   - 완충밸브(Slow-closing Check Valve) 설치
+   - 펌프 토출측 서지탱크(Surge Tank) 설치
+   - 배관 유속 3 m/s 이하로 설계`
+    },
+    {
+      number: 8, points: 25,
+      text: `<strong>연결송수관설비 및 연결살수설비</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '연결송수관설비의 설치 대상, 구성, 방수구 설치 기준을 설명하시오.' },
+        { label: '(2)', text: '연결살수설비의 설치 대상과 폐쇄형·개방형 헤드 방식의 차이를 설명하시오.' },
+        { label: '(3)', text: '방수구함 설치 기준 및 소방관 사용 절차를 설명하시오.' },
+      ],
+      answer: `【8】 연결송수관설비 및 연결살수설비
+
+(1) 연결송수관설비
+
+▶ 설치 대상 (NFTC 502)
+ · 지하층 제외 5층 이상, 연면적 6,000 m² 이상
+ · 지하층 바닥면적 합계 3,000 m² 이상
+ · 층수 11층 이상인 건축물
+ · 지하가(터널 제외) 연장 500 m 이상
+
+▶ 구성 요소
+ · 송수구 (지상): 소방차가 물을 공급하는 쌍구형 구경 65 mm 접속구
+ · 방수구 (각 층): 소방관이 호스 연결하여 방수하는 65 mm 앵글밸브
+ · 방수기구함: 방수구 인근 설치 (호스·관창 보관)
+ · 배관: 습식(항시 가압수) 또는 건식
+
+▶ 방수구 설치 기준
+ · 11층 이상 또는 지하층: 각 층마다 설치
+ · 5~10층: 바닥면적 1,000 m²마다 1개
+ · 위치: 계단실·비상용 엘리베이터 부근 보행거리 5 m 이내
+ · 높이: 바닥에서 0.5~1.0 m 이내
+
+(2) 연결살수설비
+
+▶ 설치 대상 (NFTC 503)
+ · 지하층 바닥면적 합계 150 m² 이상
+ · 지하가(터널 제외): 연장 700 m 이상
+ · 판매시설·운수시설의 지하층
+
+▶ 폐쇄형 vs 개방형 헤드 방식
+ 구분        │ 폐쇄형                  │ 개방형
+ ────────────┼─────────────────────────┼──────────────────────────
+ 헤드 구조  │ 퓨즈블링크 또는 글라스벌브│ 항상 개방
+ 작동        │ 열에 의한 헤드 자동 개방 │ 수동 또는 자동 밸브 개방
+ 방수 범위  │ 개방된 헤드에서만 방수   │ 구역 내 전 헤드 동시 방수
+ 적용        │ 일반 지하층              │ 천장 노출 불가 장소
+
+▶ 수원
+ · 헤드 10개 기준: 10 × 80 ℓ/min × 20분 = 16 m³ 이상
+
+(3) 방수구함 설치 기준 및 소방관 사용 절차
+
+▶ 방수구함 설치 기준
+ · 재질: 두께 1.5 mm 이상 강판 또는 동등 이상 불연재
+ · 크기: 호스 2본 + 관창 1개 이상 수납 가능
+ · 표시: "방수구" 적색 표지판, 조명 확보
+ · 잠금: 잠금장치 설치 가능 (소방대 전용 열쇠 비치)
+
+▶ 소방관 사용 절차
+ 1. 지상 송수구에 소방차 연결 → 송수 시작
+ 2. 해당 층 방수구함 개방
+ 3. 65 mm 소방호스 방수구에 연결
+ 4. 방수구 앵글밸브 개방
+ 5. 관창 조작하여 방수`
+    },
+    {
+      number: 9, points: 25,
+      text: `<strong>소화기구 및 자동소화장치</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '소화기의 적응 화재(A·B·C·K급)별 특성과 소화약제를 설명하시오.' },
+        { label: '(2)', text: '자동소화장치의 종류 및 각각의 감지·소화 원리를 설명하시오.' },
+        { label: '(3)', text: '소화기의 설치 기준(배치거리, 능력단위, 보행거리)을 설명하시오.' },
+      ],
+      answer: `【9】 소화기구 및 자동소화장치
+
+(1) 화재 분류별 적응 소화기
+
+① A급 화재 (일반화재 — 백색)
+ · 목재, 종이, 섬유 등 일반 가연물의 연소 후 재(灰)를 남기는 화재
+ · 적응 약제: 물, ABC 분말, 강화액, 할로겐화합물(일부)
+ · 소화 원리: 냉각 및 질식
+
+② B급 화재 (유류화재 — 황색)
+ · 가솔린, 경유, 알코올 등 인화성 액체 및 가스 화재
+ · 적응 약제: 포(Foam), 분말(BC·ABC), CO₂, 할로겐화합물
+ · 소화 원리: 질식 및 억제 (냉각 효과 작음)
+
+③ C급 화재 (전기화재 — 청색)
+ · 통전 중인 전기기기·배선 등 전기 에너지에 의한 화재
+ · 적응 약제: CO₂, 분말(BC·ABC), 할로겐화합물 (비전도성 약제)
+ · 포·물 사용 금지 (감전 위험)
+
+④ K급 화재 (주방화재)
+ · 동·식물성 유지(식용유)의 화재 (발화점 특이, 재착화 위험)
+ · 적응 약제: 습식화학약제 (아세트산칼륨, 아세트산칼슘 등)
+ · 소화 원리: 비누화 반응 → 유면 피막 형성 + 냉각
+
+(2) 자동소화장치 종류
+
+① 주거용 주방자동소화장치
+ · 감지: 열감지선(퓨즈 방식), 정온식 감지기
+ · 소화: 습식화학약제 분무 → 후드 내 유면 질식
+ · 적용: 아파트·단독주택 주방
+
+② 상업용 주방자동소화장치
+ · 감지: 퓨즈블링크(온도 범위 설정)
+ · 소화: 습식화학약제(K급), 가스 연료 자동 차단 연동
+ · 적용: 식당·호텔 주방
+
+③ 캐비닛형 자동소화장치
+ · 감지: 연기감지기 + 열감지기 복합
+ · 소화: CO₂ 또는 청정소화약제
+ · 적용: 전기제어반, 분전반, 통신 장비함
+
+④ 가스자동소화장치
+ · 감지: 자동화재탐지설비 연동
+ · 소화: 가스계 소화약제 전역방출
+ · 적용: 소규모 서버실, 전산실
+
+(3) 소화기 설치 기준
+
+▶ 능력단위 기준
+ · 특정소방대상물: 연면적 100 m²마다 능력단위 1단위 이상
+ · 아파트: 세대별 능력단위 1단위 이상
+ · 부속용도 별도 추가 산정
+
+▶ 배치 기준 (보행거리)
+ · 소형소화기: 보행거리 20 m 이내마다 1개
+ · 대형소화기: 보행거리 30 m 이내마다 1개
+ · 각 층마다 설치 (지하층·무창층·4층 이상: 대형 추가)
+
+▶ 설치 위치
+ · 통행 방해 없는 출입구 부근 (눈에 잘 띄는 곳)
+ · 설치 높이: 바닥에서 1.5 m 이하 (손잡이 기준)
+ · 옥외·고온·다습 장소: 보호 조치 필요`
+    },
+    {
+      number: 10, points: 25,
+      text: `<strong>할론소화설비 및 할론 대체 물질</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '할론소화약제(Halon 1301, 1211, 2402)의 소화 원리와 특성을 설명하시오.' },
+        { label: '(2)', text: '몬트리올 의정서에 의한 할론 규제 배경 및 국내 조치를 설명하시오.' },
+        { label: '(3)', text: '할론 대체 물질 선정 기준(ODP·GWP·NOAEL·LOAEL)을 설명하시오.' },
+      ],
+      answer: `【10】 할론소화설비 및 할론 대체 물질
+
+(1) 할론소화약제 소화 원리 및 특성
+
+▶ 소화 원리 (부촉매 소화 — 가장 효과적)
+ · 연소의 연쇄반응에서 활성 라디칼(OH·, H·, O·) 포착·불활성화
+ · 연쇄반응 중단 → 화염 즉시 소화
+ · 농도가 낮아도 효과 우수 (CO₂의 약 5~10배)
+
+▶ 할론 종류 비교
+ 할론 1301 (CF₃Br): 전역방출 기준약제, 무색무취, 독성 낮음
+  → NOAEL 5%, 설계농도 5%로 가장 안전한 할론
+ 할론 1211 (CF₂ClBr): 이동식(소화기용), 방사거리 우수
+ 할론 2402 (C₂F₄Br₂): 독성 강해 국내 거의 미사용
+
+▶ 공통 특성
+ · 소화 후 잔류물 없음 → 정밀기기 보호
+ · 전기 비전도성
+ · 저장 안정성 우수 (액체 저장, 소형 용기)
+ · ODP 매우 높음 (Halon 1301: ODP = 10)
+
+(2) 몬트리올 의정서 및 국내 조치
+
+▶ 몬트리올 의정서 (1987년)
+ · 오존층 파괴 물질(ODS: Ozone Depleting Substances) 규제 국제 협약
+ · 할론: 오존 파괴능력이 CFC보다 3~10배 강함
+ · 선진국 1994년, 개발도상국 2010년 생산·수입 전면 금지
+
+▶ 국내 조치
+ · 1994년 할론 생산·수입 금지
+ · 기설치 설비는 유지 허용 (할론 뱅크 운영 — 기존 약제 재활용)
+ · 신규 설치: 청정소화약제(HFC계, FK계, 불활성기체계)로 대체 의무
+
+(3) 대체 물질 선정 기준
+
+① ODP (Ozone Depletion Potential, 오존파괴지수)
+ · CFC-11 기준 1.0으로 설정
+ · 대체 물질 조건: ODP = 0 필수
+
+② GWP (Global Warming Potential, 지구온난화지수)
+ · CO₂ 기준 1.0으로 설정 (100년 기준)
+ · 낮을수록 환경 친화적 (FK-5-1-12: GWP ≈ 1)
+ · 유럽 F-Gas 규정: GWP 2,500 초과 물질 규제 강화
+
+③ NOAEL (No Observable Adverse Effect Level)
+ · 동물실험에서 심장 민감화 등 부작용이 나타나지 않는 최대 농도
+ · 소화 설계농도 ≤ NOAEL → 사람 체류 구역 적용 가능
+
+④ LOAEL (Lowest Observable Adverse Effect Level)
+ · 부작용이 처음 관찰되는 최소 농도
+ · NOAEL < 설계농도 ≤ LOAEL: 비상 대피 후 적용
+ · 설계농도 > LOAEL: 사람 체류 절대 금지
+
+▶ 친환경 대체 약제 추세
+ · FK-5-1-12(Novec 1230): GWP 1, ODP 0 → 가장 이상적
+ · IG-541: ODP·GWP 모두 0, 단 저장 체적 큼`
+    }
+  ],
+
+  // ── 세트 2: 화재공학 ──────────────────────────
+  [
+    {
+      number: 1, points: 25,
+      text: `건축물의 <strong>화재 성상(Fire Behavior)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '구획화재의 발전 단계(발화-성장-플래시오버-최성기-쇠퇴기)를 시간-온도 곡선과 함께 설명하시오.' },
+        { label: '(2)', text: '플래시오버(Flashover)의 발생 조건, 임계 열유속, 예측 모델을 설명하시오.' },
+        { label: '(3)', text: '백드래프트(Backdraft)와 플래시오버의 차이점을 설명하고 소방관의 대응 요령을 서술하시오.' },
+      ],
+      answer: `【1】 구획화재 성상
+
+(1) 구획화재 발전 단계
+
+ ① 발화기(Incipient): 점화원에 의한 초기 연소, 온도 상승 미미
+ ② 성장기(Growth): 자유연소, t² 화재(열방출률 ∝ 시간²), 온도 급상승
+ ③ 플래시오버(Flashover): 구획 전체 동시 착화 전이 단계 (~600℃)
+ ④ 최성기(Fully Developed): 구획 내 모든 가연물 연소, 1,000℃ 이상
+ ⑤ 쇠퇴기(Decay): 가연물 감소로 온도 하강
+
+ → 시간-온도 곡선 특징: 성장기에 지수함수적 상승,
+   플래시오버를 기점으로 최성기 진입 시 급격한 온도 점프
+
+(2) 플래시오버 발생 조건 및 예측
+
+ ▶ 발생 조건
+  · 구획 상층부 고온 가스층(Hot Gas Layer) 온도 ≥ 600℃
+  · 바닥면 복사 열유속 ≥ 20 kW/m² (가연물 발화에 필요한 임계값)
+
+ ▶ 임계 열유속
+  · 20 kW/m²: 일반 가연물의 자연발화 임계 복사열
+
+ ▶ 예측 모델
+  · Thomas 모델: Q̇_FO = 7.8 A_T + 378 √(A_v h_v)
+    (A_T: 총 내면적, A_v: 개구부 면적, h_v: 개구부 높이)
+  · McCaffrey·Quintiere·Harkleroad(MQH) 모델:
+    T_g - T_∞ = 480 (Q̇/(A_v√h_v))^(2/3) / (h_k A_T)^(1/3)
+
+(3) 백드래프트 vs 플래시오버 비교 및 대응
+
+ 구분        │ 플래시오버          │ 백드래프트
+ ─────────────┼─────────────────────┼─────────────────────
+ 발생 원인   │ 복사 열유속 누적    │ 신선한 공기 유입
+ 연료 조건   │ 충분한 연료+공기    │ 연료과잉(산소 부족)
+ 발생 시점   │ 성장기 말          │ 쇠퇴기 또는 밀폐 화재
+ 예고 신호   │ 구획 상층부 고온    │ 불꽃 없는 연기, 문손잡이 뜨거움
+ 피해 방향   │ 구획 내부          │ 개방 방향으로 폭발
+
+ ▶ 소방관 대응
+  - 플래시오버 대응: 진입 전 고온 가스층 위치 확인, 낮은 자세 유지
+    냉각 공격(Cooling Attack)으로 Hot Gas Layer 온도 저하
+  - 백드래프트 대응: 개방 전 문 손잡이·문틈 온도·연기 흡입 여부 확인
+    환기 전 충분한 관창 준비, 측면에서 문 개방(Positive Pressure Attack)
+    지붕 환기(VES: Vent-Enter-Search) 전술 활용`
+    },
+    {
+      number: 2, points: 25,
+      text: `건축물의 <strong>내화구조 및 방화구획</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '내화구조의 정의와 KS F 2257 표준 내화시험 방법을 설명하시오.' },
+        { label: '(2)', text: '건축물의 방화구획 기준(「건축물의 피난·방화구조 등의 기준에 관한 규칙」)을 면적, 층, 용도별로 설명하시오.' },
+        { label: '(3)', text: '방화문의 종류(갑종·을종)와 성능 기준, 설치 기준을 설명하시오.' },
+      ],
+      answer: `【2】 내화구조 및 방화구획
+
+(1) 내화구조 및 KS F 2257 표준 내화시험
+
+▶ 내화구조 정의 (건축법 제2조)
+ · 화재에 견딜 수 있는 성능을 가진 구조로 국토교통부령으로 정하는 기준에 적합한 구조
+ · 철근콘크리트조, 철골철근콘크리트조, 철골조(내화피복), 벽돌조, 석조 등
+
+▶ KS F 2257 내화시험 방법
+ · 표준 시간-온도 곡선 적용: T = 345 log₁₀(8t+1) + T₀
+   (t: 시간[분], T₀: 초기 온도)
+ · 평가 항목
+   - 차염성(Integrity): 화염·고온가스 관통 여부
+   - 차열성(Insulation): 이면 온도 140℃ 초과 여부 (평균), 180℃(최고)
+   - 하중지지력(Loadbearing): 구조적 붕괴 여부
+
+ · 내화 시간 기준 (일반 건축물)
+   - 용도별, 층수별로 1시간 ~ 3시간 적용
+   - 12층 초과: 기둥·보 2~3시간, 내력벽 2시간
+
+(2) 방화구획 기준
+
+ ① 면적별 구획
+  · 10층 이하: 바닥면적 1,000 m²마다 구획
+    (스프링클러 설치 시: 3,000 m²마다)
+  · 3층 이상 또는 지하층: 200 m²마다 구획
+    (스프링클러 설치 시: 600 m²마다)
+
+ ② 층별 구획 (수직 구획)
+  · 매 층마다 층간 방화구획 설치
+  · 3층 이상의 층과 지하층 사이
+
+ ③ 용도별 구획
+  · 건축물 일부에 위험 용도(주유소, 위험물 저장소) 포함 시 별도 구획
+  · 주거 용도와 비주거 용도 혼재 시 구획
+
+▶ 방화구획의 구조
+ · 내화구조 바닥·벽 + 방화문 또는 방화셔터
+ · 관통부(배관, 케이블, 덕트): 내화충전재 또는 방화댐퍼 설치
+
+(3) 방화문 종류 및 성능·설치 기준
+
+ 구분      │ 갑종 방화문              │ 을종 방화문
+ ──────────┼──────────────────────────┼────────────────────
+ 차염 성능  │ 1시간 이상               │ 30분 이상
+ 차열 성능  │ 30분 이상 (비차열도 가능) │ 해당 없음
+ 적용 장소  │ 방화구획의 개구부, 피난계단 │ 방화벽의 개구부 등
+
+▶ 설치 기준
+ · 상시 닫힘(常時閉鎖) 원칙 또는 자동폐쇄장치 설치
+ · 피난방향 개폐(피난 시 피난방향으로 열림)
+ · 방화문 주변 틈새: 내화충전재 처리
+ · 도어클로저(Closer) 필수 설치
+ · 2020.12.10. 이후: 갑종/을종 명칭 → 60분+ / 60분 / 30분 방화문으로 개정`
+    },
+    {
+      number: 3, points: 25,
+      text: `<strong>연기(Smoke)</strong>의 이동 및 제어에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '건물 내 연기 이동을 촉진하는 4가지 요인(굴뚝효과, 부력, 팽창, HVAC)을 설명하시오.' },
+        { label: '(2)', text: '연기의 감광계수(Cs)와 감광계수별 피난 가능성을 설명하시오.' },
+        { label: '(3)', text: '「소방시설법」 상 제연설비의 설치 대상 및 제연방식(자연제연, 기계제연)을 비교 설명하시오.' },
+      ],
+      answer: `【3】 연기 이동 및 제어
+
+(1) 연기 이동 촉진 4가지 요인
+
+① 굴뚝효과(Stack Effect / 연돌효과)
+ · 건물 내·외부 온도차에 의한 밀도차로 공기 흐름 발생
+ · 겨울철(외부 냉): 1층에서 공기 유입 → 상부로 이동 (정압 굴뚝효과)
+ · 여름철(외부 온): 반대 방향 (역굴뚝효과)
+ · 고층 건물일수록 굴뚝효과 강하여 연기 수직 이동 가속
+
+② 부력(Buoyancy)
+ · 화재 시 고온 연기가 주변 공기보다 밀도 낮아 상승
+ · 천장, 덕트, 계단실을 통한 연기 이동의 주된 원인
+ · 온도 높을수록 부력 효과 증대
+
+③ 팽창(Expansion)
+ · 연소로 인한 온도 상승 → 가스 체적 팽창
+ · 화원 주변 압력 증가 → 연기가 주변으로 확산
+ · 폭발적 연소 시 순간적 팽창 효과 극대화
+
+④ HVAC 시스템(공조 설비)
+ · 환기 덕트를 통한 연기 전 구획으로의 전파
+ · 화재 시 HVAC 자동 정지 필수 (연기 확산 방지)
+ · 방화댐퍼(Fire Damper) + 연기댐퍼(Smoke Damper) 조합 사용
+
+(2) 감광계수(Cs)와 피난 가능성
+
+ ▶ 감광계수 정의
+  · Cs = (1/L) × ln(I₀/I) [m⁻¹]
+  · L: 광로 길이, I₀: 입사광, I: 투과광
+
+ 감광계수 Cs   │ 가시거리    │ 상황
+ ─────────────┼─────────────┼──────────────────────────
+ 0.1 m⁻¹     │ 20~30 m    │ 피난 가능 (옅은 연기)
+ 0.3 m⁻¹     │ 5 m        │ 피난 가능하나 주의 필요
+ 0.5 m⁻¹     │ 3 m        │ 피난 한계 (비상구 표지 인식 어려움)
+ 1.0 m⁻¹     │ 1~2 m      │ 피난 불가 (자력 탈출 거의 불가)
+ ≥ 3.0 m⁻¹  │ < 0.5 m    │ 완전 전 구획 연기 충만
+
+ ▶ 허용 감광계수: 피난 설계 시 Cs ≤ 0.1~0.15 m⁻¹ 유지 목표
+
+(3) 제연설비 설치 대상 및 방식
+
+▶ 설치 대상 (소방시설법 시행령 [별표 4])
+ · 문화·집회·운동·판매시설 (지하층, 무창층 포함) 바닥면적 1,000 m² 이상
+ · 지하층 바닥면적 합계 1,000 m² 이상인 것
+ · 특별피난계단 부속실, 비상용 승강기 승강장
+ · 16층 이상 건축물 (부속실 제연 의무)
+
+▶ 제연방식 비교
+
+ 구분          │ 자연제연                    │ 기계제연
+ ──────────────┼─────────────────────────────┼─────────────────────────
+ 원리          │ 온도차·기압차에 의한 자연통기 │ 기계력(팬)으로 급·배기
+ 구성          │ 배연창, 제연 개구부           │ 급기팬, 배기팬, 덕트
+ 설치 조건     │ 외벽 또는 지붕 개구부 필요   │ 실내 어디든 설치 가능
+ 신뢰성        │ 기상 조건에 따라 성능 변동   │ 일정한 제연 성능 유지
+ 비용          │ 저렴                          │ 높음 (유지보수 포함)
+ 적용 장소     │ 소규모, 외벽 인접 공간       │ 지하층, 대형 공간, 부속실
+
+ ▶ 부속실 제연 방식 (「제연설비의 화재안전기준」)
+  · 급기가압방식: 부속실·계단실에 신선 공기 공급 → 양압 유지
+  · 차압 기준: 40 Pa 이상 (방화문 개방력 110 N 이하)
+  · 방연풍속: 0.5 m/s 이상 (출입문 개방 시)`
+    },
+    {
+      number: 4, points: 25,
+      text: `<strong>성능위주설계(Performance Based Design)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '사양적 설계(Prescriptive)와 성능위주설계(PBD)의 차이를 비교 설명하시오.' },
+        { label: '(2)', text: '성능위주설계의 절차(Fire Safety Engineering Process)를 단계별로 설명하시오.' },
+        { label: '(3)', text: '성능위주설계의 평가 도구인 화재·피난 시뮬레이션의 종류와 대표 프로그램을 설명하시오.' },
+      ],
+      answer: `【4】 성능위주설계(PBD)
+
+(1) 사양적 설계 vs 성능위주설계
+
+ 구분       │ 사양적 설계(Prescriptive)    │ 성능위주설계(PBD)
+ ───────────┼──────────────────────────────┼─────────────────────────────
+ 근거       │ 법령·기준의 수치 직접 적용   │ 목표 성능 설정 후 공학적 해석
+ 유연성     │ 낮음 (대안 설계 어려움)      │ 높음 (혁신적 설계 가능)
+ 경제성     │ 표준화로 비교적 저렴         │ 초기 비용 높으나 최적화 가능
+ 검증 방법  │ 규정 충족 여부 확인          │ 시뮬레이션·분석으로 성능 검증
+ 적용 대상  │ 일반 건축물                  │ 초고층·복합건물 등 특수 건축물
+
+ ▶ 성능위주설계 의무 대상 (소방시설법 시행령)
+  · 연면적 20만 m² 이상 또는 50층 이상 건축물
+  · 30층 이상 또는 높이 120m 이상 아파트
+  · 연면적 10만 m² 이상 특정소방대상물 (복합건축물 등)
+
+(2) PBD 절차
+
+ Step 1. 프로젝트 정의
+  · 건물 용도, 재실자 특성, 소방 목표 설정
+
+ Step 2. 화재 안전 목표 설정
+  · 인명 안전, 재산 보호, 연속 운영, 환경 보호
+
+ Step 3. 성능 기준 설정
+  · 정량적 수용 기준 정의 (예: ASET > RSET × 1.5)
+  · ASET(Available Safe Egress Time): 피난 가능 시간
+  · RSET(Required Safe Egress Time): 피난 소요 시간
+
+ Step 4. 설계 화재 시나리오 작성
+  · 최악 시나리오(Worst Case) 포함 복수 시나리오 선정
+  · 화원 위치, 성장률, 열방출률(HRR) 등 정의
+
+ Step 5. 화재·피난 시뮬레이션 수행
+  · 각 시나리오별 ASET, RSET 산출
+
+ Step 6. 성능 평가 및 설계 조정
+  · ASET > RSET 충족 여부 확인
+  · 미충족 시 설계 변경 후 재검토
+
+ Step 7. 보고서 작성 및 심의
+  · 소방청 또는 소방관서 PBD 심의 제출
+
+(3) 화재·피난 시뮬레이션
+
+ ▶ 화재 시뮬레이션
+  ① Zone 모델(구역 모델)
+   · 공간을 상층부(Hot Zone)·하층부(Cold Zone)로 구분
+   · 계산 빠름, 단순 공간에 적합
+   · 대표: CFAST (NIST 개발), B-RISK
+
+  ② CFD 모델(전산유체역학, 격자 기반)
+   · 3D 공간의 유체 흐름·온도·연기 농도를 격자 단위로 계산
+   · 높은 정확도, 대용량 계산 필요
+   · 대표: FDS (Fire Dynamics Simulator, NIST), Fluent, OpenFOAM
+
+ ▶ 피난 시뮬레이션
+  ① 거시적 모델: 재실자를 유체처럼 처리 → 흐름률(Flow Rate) 기반
+   · 대표: Pathfinder (Thunderhead), STEPS, SIMULEX
+
+  ② 미시적(Agent-based) 모델: 개별 재실자의 행동 모사
+   · 사회력 모델(Social Force Model) 적용
+   · 재실자 특성(연령, 이동속도, 인지시간) 개별 부여
+   · 대표: Pathfinder(에이전트 모드), MassMotion, EvacuatioNZ
+
+ ▶ 연동 해석
+  · FDS + Pathfinder 연동: 화재 시뮬레이션 결과(온도, 가시거리, CO농도)를
+    피난 시뮬레이션에 실시간 반영 → ASET/RSET 동시 산출`
+    },
+    {
+      number: 5, points: 25,
+      text: `<strong>열전달(Heat Transfer)</strong>의 3가지 방식에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '전도(Conduction), 대류(Convection), 복사(Radiation)의 원리와 지배 방정식을 설명하시오.' },
+        { label: '(2)', text: '화재 시 각 열전달 방식이 미치는 영향과 상대적 중요도를 설명하시오.' },
+        { label: '(3)', text: '내화구조 설계에서 열전달 해석이 중요한 이유와 적용 사례를 설명하시오.' },
+      ],
+      answer: `【5】 열전달 3가지 방식
+
+(1) 원리 및 지배 방정식
+
+① 전도 (Conduction)
+ · 원리: 분자 진동에 의한 에너지 전달 — 고체 내부 및 정지 유체에서 발생
+ · Fourier 법칙: q = -k A (dT/dx)
+   - q: 열유속[W], k: 열전도율[W/m·K], A: 면적[m²], dT/dx: 온도 기울기
+ · k가 클수록(금속), 열 전달 빠름 / 단열재는 k 작음
+
+② 대류 (Convection)
+ · 원리: 유체 유동에 의한 에너지 전달 — 기체·액체의 유동 동반
+ · Newton 냉각 법칙: q = h A (T_s - T_∞)
+   - h: 대류 열전달 계수[W/m²·K], T_s: 표면 온도, T_∞: 유체 온도
+ · 자연대류(부력 구동) vs 강제대류(팬·바람 구동)
+ · 화재 시: 열기류(Plume)가 대표적 자연대류
+
+③ 복사 (Radiation)
+ · 원리: 전자기파(적외선)에 의한 에너지 전달 — 매질 불필요
+ · Stefan-Boltzmann 법칙: q = ε σ A T⁴
+   - ε: 방사율(흑체 = 1), σ = 5.67×10⁻⁸ W/m²·K⁴, T: 절대온도[K]
+ · 온도 4승에 비례 → 고온 화재에서 지배적
+
+(2) 화재 시 열전달 방식별 영향
+
+▶ 성장기 (초기)
+ · 대류: 연기·열기류 상승이 주요 열 전달 경로 (천장으로 열 집중)
+ · 전도: 가연물 내부로 열 침투 — 착화에 기여
+ · 복사: 화원 주변 제한적
+
+▶ 최성기 (고온)
+ · 복사: T⁴에 비례하여 급격히 증가 → 원거리 가연물 발화 (플래시오버 유발)
+ · 대류: 구획 내 고온 연기층에서 지속
+ · 전도: 구조체(콘크리트, 철골) 내부로 열 전달 → 구조 손상
+
+▶ 상대적 중요도
+ · 초기 화재: 대류 > 전도 > 복사
+ · 발달 화재(최성기): 복사 > 대류 >> 전도
+
+(3) 내화구조 설계에서 열전달 해석 적용
+
+▶ 중요성
+ · 화재 시 구조체 내부 온도 분포 예측 → 강도 저하 시점 산정
+ · 철골 구조: 500~600℃에서 항복강도 50% 이상 감소
+ · 철근콘크리트: 콘크리트 폭렬(Spalling) 발생 온도 예측
+
+▶ 적용 사례
+ · FEM 해석: 연결부, 슬래브의 비정형 단면 온도분포 계산
+ · 내화피복 두께 산정: 강재 임계온도(550℃) 도달 시간이 내화 시간 이상이 되도록
+ · 이면 온도 기준: KS F 2257 — 평균 140℃, 최고 180℃ 이하 (차열성 평가)`
+    },
+    {
+      number: 6, points: 25,
+      text: `건축물의 <strong>화재하중(Fire Load)</strong>과 <strong>등가노출시간(Equivalent Exposure Time)</strong>에 대하여 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '화재하중의 정의, 산정 방법 및 용도별 표준 화재하중 밀도를 설명하시오.' },
+        { label: '(2)', text: '등가노출시간의 개념과 산정 방법(Law 공식, CIB 방법)을 설명하시오.' },
+        { label: '(3)', text: '화재하중과 내화설계의 관계를 설명하시오.' },
+      ],
+      answer: `【6】 화재하중 및 등가노출시간
+
+(1) 화재하중 정의 및 산정
+
+▶ 정의
+ · 화재하중(Fire Load): 구획 내 가연물이 완전 연소 시 방출되는 총 열량
+ · 화재하중 밀도(Fire Load Density): 바닥면적 단위당 화재하중 [MJ/m²]
+
+▶ 산정 방법
+ q_f = Σ(m_i × H_i) / A_f
+ · m_i: 각 가연물 질량[kg]
+ · H_i: 각 가연물 단위발열량[MJ/kg]
+ · A_f: 바닥면적[m²]
+
+▶ 용도별 표준 화재하중 밀도 (CIB W14 기준 평균값)
+ · 주거(아파트): 780 MJ/m²
+ · 사무실: 420~560 MJ/m²
+ · 교실: 280~420 MJ/m²
+ · 도서관·기록실: 1,680 MJ/m² 이상
+ · 쇼핑센터: 600~900 MJ/m²
+
+(2) 등가노출시간 개념 및 산정
+
+▶ 개념
+ · 실제 화재의 최고온도와 동일한 구조 손상을 일으키는 표준화재(ISO 834)의 노출 시간
+ · t_e = q_f × k_b × w_f
+   - q_f: 화재하중 밀도[MJ/m²]
+   - k_b: 내장재 단열 계수
+   - w_f: 환기 계수
+
+▶ Law 공식
+ t_e = q_f × k_b × A_f / A_v√h_v
+ · A_v: 개구부 면적[m²], h_v: 개구부 평균높이[m]
+
+▶ CIB 방법
+ · 통계적 화재하중 분포(90% 확률치) 사용
+ · 방화구획 면적, 개구율, 내장재 열적 특성 복합 고려
+
+(3) 화재하중과 내화설계의 관계
+
+▶ 내화 시간 결정
+ · 등가노출시간 t_e ≤ 내화 등급(내화 시간)이 되도록 설계
+ · t_e = 30분 → 30분 내화구조 이상 적용
+ · t_e = 90분 → 1.5시간(90분) 내화구조 적용
+
+▶ 성능위주 내화설계 적용
+ · 규정 고정 내화 시간 대신 실제 화재하중 산정 → 경제적 내화 설계 가능
+ · 화재하중이 낮은 용도(주차장): 내화 시간 단축 가능
+ · 화재하중이 높은 용도(창고·도서관): 내화 시간 연장 필요
+
+▶ 방화구획과의 연계
+ · 구획 면적이 클수록 q_f 집중 → 등가노출시간 증가
+ · 방화구획 세분화: 화재하중 분산 → t_e 감소`
+    },
+    {
+      number: 7, points: 25,
+      text: `<strong>인간의 화재 시 피난 행동 특성</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '화재 인지 후 피난 행동 과정(인지-판단-행동)을 단계별로 설명하시오.' },
+        { label: '(2)', text: '피난 시 나타나는 군집 행동(귀소본능, 추종본능 등) 6가지를 설명하시오.' },
+        { label: '(3)', text: '재실자 특성(노약자, 장애인)이 피난 설계에 미치는 영향을 설명하시오.' },
+      ],
+      answer: `【7】 화재 시 피난 행동 특성
+
+(1) 피난 행동 과정
+
+▶ 1단계: 화재 인지(Recognition)
+ · 화재 신호(연기, 냄새, 경보) 인식
+ · 경보 무시(False Alarm 학습 효과): 실제 화재에서도 즉각 반응 안 함
+ · 인지 시간에 영향: 깨어있는 상태, 경보 종류, 친숙도
+
+▶ 2단계: 해석 및 판단(Interpretation & Decision)
+ · 상황 심각성 판단 — 다른 사람 행동 관찰
+ · 사회적 친화성(Affiliation): 가족·지인 위치 먼저 확인하는 경향
+ · 역할 행동: 직원·직책자는 지원 행동 먼저 수행
+
+▶ 3단계: 행동(Action)
+ · 대피 결정 후 이동 시작
+ · RSET = 감지 시간 + 경보 시간 + 반응 시간 + 이동 시간
+ · 이동 속도: 수평 1.0~1.5 m/s, 계단 하행 0.5~0.7 m/s
+
+(2) 피난 시 군집 행동 특성
+
+① 귀소본능 (향가성): 익숙한 경로(주출입구)로 피난 → 비상구 집중 유도 강화
+② 추종본능 (추수성): 앞사람 행동을 따름 → 잘못된 선택의 집단적 확산
+③ 지광성: 밝은 곳으로 이동 → 정전 시 비상조명·유도등 중요
+④ 좌회전 본능: 위협 시 왼쪽으로 회피 → 좌회전 동선 설계 고려
+⑤ 개방 공간 지향: 밀폐 기피, 넓은 공간으로 이동 → 좁은 복도 혼잡 원인
+⑥ 패닉 현상: 출구 부근 군집 과압(4~8 p/m²) → 압사 위험, 훈련된 피난 유도원 배치
+
+(3) 재실자 특성과 피난 설계
+
+▶ 노약자·노인
+ · 이동 속도 저하 (0.3~0.5 m/s), 경보 인지 지연
+ · 대책: 피난용 엘리베이터, 피난 안전구역, 피난 보조 인력
+
+▶ 장애인 (휠체어 사용자)
+ · 계단 이용 불가 → 피난 안전구역에서 대기
+ · 통로 폭: 1.2 m 이상, 경사로 1:12 이하
+ · 대책: 피난 보조 장치(Evacuation Chair), 구조 대기 구역 표시
+
+▶ 어린이
+ · 상황 판단 능력 부족, 숨는 경향, 연기 흡입 한계값 낮음
+ · 대책: 보호자 동반 훈련, 낮은 위치 유도등`
+    },
+    {
+      number: 8, points: 25,
+      text: `<strong>화재 위험성 평가 기법</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: 'FTA(결함수 분석법)의 개념, 절차, 기호(AND·OR 게이트)를 설명하시오.' },
+        { label: '(2)', text: 'FMEA(고장모드 영향분석)의 개념 및 절차를 설명하고 FTA와 비교하시오.' },
+        { label: '(3)', text: 'HAZOP(위험 및 운전분석) 기법의 절차와 가이드워드 적용 방법을 설명하시오.' },
+      ],
+      answer: `【8】 화재 위험성 평가 기법
+
+(1) FTA (Fault Tree Analysis, 결함수 분석법)
+
+▶ 개념: 특정 사고(Top Event)로부터 원인을 논리 게이트로 역추적하는 연역적 Top-Down 분석법
+
+▶ 주요 기호
+ · AND 게이트 (∩): 모든 하위 사건 동시 발생 시 상위 사건 발생
+ · OR 게이트 (∪): 하위 사건 중 하나만 발생해도 상위 사건 발생
+ · 기본사상(Basic Event): 최하위 원인 (더 이상 분해 불가)
+
+▶ 절차
+ 1. Top Event 정의 2. 중간 사상 도출 및 논리 게이트 연결
+ 3. 최소 컷셋(Minimal Cut Set) 산출
+ 4. 정성적·정량적 위험도 평가 5. 개선 대책 도출
+
+(2) FMEA (Failure Mode and Effects Analysis)
+
+▶ 개념: 구성 요소별 고장 모드를 사전 식별하고 영향 평가하는 귀납적 Bottom-Up 분석법
+
+▶ 절차
+ 1. 시스템 구성 요소 목록화
+ 2. 고장 모드 식별
+ 3. RPN = 심각도 × 발생도 × 검출도
+ 4. RPN 높은 순서로 개선 우선순위 결정
+
+▶ FTA vs FMEA 비교
+ 구분     │ FTA          │ FMEA
+ ─────────┼──────────────┼─────────────────
+ 분석 방향│ 하향식(연역) │ 상향식(귀납)
+ 시작점   │ 사고(결과)   │ 고장 모드(원인)
+ 결과물   │ 최소 컷셋    │ RPN 우선순위
+
+(3) HAZOP (Hazard and Operability Study)
+
+▶ 개념: 설계 의도에서 벗어난 이탈(Deviation)을 체계적으로 식별하는 다학제 팀 기법
+
+▶ 가이드워드
+ No/Not: 유량·압력 없음 | More: 설계값 초과
+ Less: 설계값 미달 | As Well As: 불순물 혼입
+ Reverse: 역방향(역류) | Other Than: 다른 물질
+
+▶ 절차
+ 1. 분석 범위 및 팀 구성
+ 2. P&ID 검토, 노드 선정
+ 3. 가이드워드 × 공정 변수 조합으로 이탈 도출
+ 4. 원인·결과 분석 및 안전장치 검토
+ 5. 권고 사항 작성`
+    },
+    {
+      number: 9, points: 25,
+      text: `<strong>연소 이론</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '인화점·발화점·연소점의 정의와 차이, 소방 설계에서의 의미를 설명하시오.' },
+        { label: '(2)', text: '연소범위(폭발한계)의 정의와 LFL·UFL, 영향 인자를 설명하시오.' },
+        { label: '(3)', text: '열방출률(HRR)의 개념과 t² 화재 성장 모델을 설명하시오.' },
+      ],
+      answer: `【9】 연소 이론
+
+(1) 인화점·발화점·연소점
+
+① 인화점 (Flash Point): 외부 점화원으로 순간 착화되는 최저 온도 — 지속 연소 불가
+② 연소점 (Fire Point): 점화원 제거 후 5초 이상 지속 연소 최저 온도 (인화점보다 약 5~10℃ 높음)
+③ 발화점 (AIT): 외부 점화원 없이 자연 발화하는 최저 온도 (항상 인화점보다 높음)
+
+ 인화점 < 연소점 < 발화점
+
+▶ 소방 설계 의미
+ · 저장 온도: 인화점 이하로 유지 (위험물 냉각 보관)
+ · 소화 전략: 연소점 이하로 냉각(냉각소화)
+ · 위험물 분류: 인화점 21℃ 미만 → 제1석유류
+
+(2) 연소범위(폭발한계)
+
+▶ 정의
+ · LFL (하한계): 연소·폭발 가능한 최소 가연물 농도[vol%]
+ · UFL (상한계): 연소·폭발 가능한 최대 가연물 농도[vol%]
+
+▶ 주요 가연물
+ 수소: 4~75% | 메탄: 5~15% | LPG: 2.1~9.5% | 가솔린: 1.4~7.6%
+
+▶ 영향 인자
+ · 온도 상승 → LFL 감소, UFL 증가 (범위 확대)
+ · 압력 증가 → UFL 크게 증가
+ · 불활성 가스 첨가 → 범위 축소 (불활성화 원리)
+
+(3) 열방출률(HRR) 및 t² 모델
+
+▶ HRR 개념: Q̇ [kW] — 단위 시간당 방출 열량, 화재 규모의 핵심 지표
+
+▶ t² 화재 성장 모델 (NFPA 72)
+ Q̇ = α × t²
+ · 느림(Slow): α = 0.00293 kW/s² — 목재
+ · 보통(Medium): α = 0.01172 kW/s² — 사무용 가구
+ · 빠름(Fast): α = 0.04689 kW/s² — 플라스틱
+ · 매우 빠름(Ultra-fast): α = 0.18756 kW/s² — 가연성 액체
+
+▶ 활용
+ · 스프링클러 작동 시 화재 규모 산출
+ · 제연설비 배기량 산정 (Plume 공식 적용)
+ · ASET 산정 시 위험 조건 도달 시점 예측`
+    },
+    {
+      number: 10, points: 25,
+      text: `<strong>화재 모델링(Fire Modeling)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '구역 모델(Zone Model)과 필드 모델(Field Model, CFD)의 원리와 차이를 비교 설명하시오.' },
+        { label: '(2)', text: 'FDS(Fire Dynamics Simulator)의 특성과 주요 입력 변수를 설명하시오.' },
+        { label: '(3)', text: '화재 모델링의 불확실성(Uncertainty)과 검증(Validation) 방법을 설명하시오.' },
+      ],
+      answer: `【10】 화재 모델링
+
+(1) 구역 모델 vs 필드 모델(CFD) 비교
+
+▶ 구역 모델(Zone Model)
+ · 원리: 구획을 상부 고온층(Hot Layer)과 하부 냉층(Cold Layer) 2개로 단순화
+ · 질량·에너지 보존 방정식으로 각 층의 온도·농도 계산
+ · 대표 프로그램: CFAST (NIST)
+ · 특징: 계산 빠름, 단순 구획 적합 / 복잡 형상 표현 한계
+
+▶ 필드 모델(CFD)
+ · 원리: 3D 공간을 격자로 분할 → 각 격자에서 N-S 방정식 풀이
+ · 온도·유속·화학종·복사열 3차원 분포 계산
+ · 대표 프로그램: FDS (NIST), ANSYS Fluent
+ · 특징: 복잡 건물·기류 표현 가능, 계산 시간 매우 길다
+
+▶ 비교
+ 구분       │ 구역 모델     │ 필드 모델(CFD)
+ ───────────┼───────────────┼─────────────────
+ 계산 속도  │ 빠름 (초~분)  │ 느림 (시간~일)
+ 정확도     │ 중간          │ 높음
+ 적용 형상  │ 단순 구획     │ 복잡한 3D 공간
+
+(2) FDS 특성 및 입력 변수
+
+▶ FDS 특성
+ · NIST 개발 무료 공개 소프트웨어
+ · LES(Large Eddy Simulation) 기반 난류 모델
+ · 연기·열·스프링클러 작동 모사 가능
+ · 시각화: Smokeview (3D 애니메이션)
+
+▶ 주요 입력 변수
+ · 기하 형상: 벽·바닥·천장 좌표, 개구부 위치·크기
+ · 화원(Burner): 위치, HRR 곡선(t² 모델)
+ · 연료 특성: 연소열, 연기 발생률(Soot Yield), CO 발생률
+ · 스프링클러: 위치, RTI, 작동온도, 방수량
+ · 경계 조건: 벽면 열전달, 환기 조건
+
+(3) 불확실성 및 검증 방법
+
+▶ 불확실성 유형
+ · 모델 불확실성: 물리 방정식 단순화
+ · 입력 불확실성: 화재 성장 속도·연료 특성 추정 오차
+ · 수치 불확실성: 격자 해상도, 시간 간격
+
+▶ 검증 방법
+ · Verification: 방정식을 올바르게 푸는지 확인 (코드 검증)
+ · Validation: 실험 결과와 일치 여부 확인 (물리 검증)
+   - 실규모 화재 실험 결과와 비교 (NIST SP 1018)
+
+▶ 불확실성 대처
+ · 민감도 분석: 핵심 입력값 ±20% 변화 시 결과 변동 분석
+ · 보수적 시나리오: 최악 조건(Worst Case) 적용
+ · 안전계수: ASET/RSET ≥ 1.5 확보`
+    }
+  ],
+
+  // ── 세트 3: 제연·피난 ──────────────────────
+  [
+    {
+      number: 1, points: 25,
+      text: `특별피난계단 <strong>부속실 제연설비</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '부속실 제연의 목적과 급기가압 방식의 원리를 설명하시오.' },
+        { label: '(2)', text: '차압, 방연풍속, 개방력의 기준값과 이들 간의 관계를 설명하시오.' },
+        { label: '(3)', text: '과압 방지를 위한 자동차압·과압조절형 댐퍼(APCD)의 작동 원리를 설명하시오.' },
+      ],
+      answer: `【1】 부속실 제연설비
+
+(1) 목적 및 급기가압 원리
+
+▶ 목적
+ · 화재 시 특별피난계단 부속실·계단실을 안전 피난 경로로 유지
+ · 연기 침입 차단 → 피난 중 재실자 생존 가능한 환경 유지
+ · 소방대 진입 경로 확보
+
+▶ 급기가압 원리
+ · 부속실·계단실에 외부 신선 공기를 가압 주입
+ · 부속실 압력 > 화재실 압력 → 연기의 부속실 침입 방지
+ · 차압(압력차)을 일정 수준으로 유지하여 기밀 유지
+ · 급기팬 → 수직 급기 덕트 → 각 층 부속실 급기구
+
+(2) 차압·방연풍속·개방력 기준 및 관계
+
+ ▶ 차압 (Pressure Differential)
+  · 기준: 40 Pa 이상 (옥내와 부속실 사이)
+  · 스프링클러 설치 건물: 12.5 Pa 이상 (소화수 방사로 차압 완화)
+  · 최대 차압 제한: 과도한 차압 → 문 개방력 초과
+
+ ▶ 방연풍속 (Air Velocity)
+  · 방화문 개방 시 연기 침입을 막는 최소 기류 속도
+  · 기준: 0.5 m/s 이상
+    (계단실 단독 가압, 부속실·계단실 동시가압 구분 없이 동일)
+
+ ▶ 개방력 기준
+  · 방화문 개방에 필요한 힘: 110 N 이하
+  · 과도한 차압은 개방력 증가 → 노약자 피난 불가 → 과압방지 필수
+
+ ▶ 상호 관계
+  · 차압 ↑ → 연기 차단 효과 ↑ but 개방력 ↑
+  · 방화문 개방 시 차압 소실 → 방연풍속으로 연기 차단 전환
+  · 설계 시 문 개방 상태와 폐쇄 상태 모두 만족해야 함
+
+(3) APCD(자동차압·과압조절형 댐퍼) 작동 원리
+
+ ▶ 설치 목적
+  · 층별 급기량 자동 조절 → 전 층 균등 차압 유지
+  · 과압 방지 (문 개방력 110 N 초과 방지)
+
+ ▶ 작동 원리
+  · 각 층 급기구에 APCD 설치
+  · 내부 압력 센서 또는 기계식 스프링으로 차압 감지
+  · 차압 기준 초과 시: 댐퍼 개도 감소 → 급기량 감소 → 차압 저하
+  · 차압 기준 미달 시: 댐퍼 개도 증가 → 급기량 증가 → 차압 상승
+  · 화재 층 방화문 개방 시: 해당 층 APCD 전개(Full Open) → 방연풍속 유지`
+    },
+    {
+      number: 2, points: 25,
+      text: `피난 안전성 평가를 위한 <strong>ASET과 RSET</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: 'ASET(Available Safe Egress Time)의 정의와 산출 방법을 설명하시오.' },
+        { label: '(2)', text: 'RSET(Required Safe Egress Time)의 구성 요소를 설명하시오.' },
+        { label: '(3)', text: 'ASET ≥ RSET × 안전율이 성립하지 않는 경우의 설계 개선 방안을 제시하시오.' },
+      ],
+      answer: `【2】 ASET과 RSET
+
+(1) ASET 정의 및 산출
+
+▶ 정의
+ · 화재 발생 시점부터 피난자가 생존 가능한 환경이 유지되는 시간
+ · 즉, 화재 성장에 따라 거주 불능 조건(Untenable Condition)에 도달하는 시간
+
+▶ 거주 불능 기준
+ · 온도: 60℃ (머리 높이) 이상
+ · 가시거리: 10 m 이하 (대규모 공간), 5 m 이하 (소규모)
+ · CO 농도: 1,400 ppm 이상 (30분 노출 시 치사 농도)
+ · 복사 열유속: 2.5 kW/m² 이상
+
+▶ 산출 방법
+ · 화재 시뮬레이션(FDS, CFAST 등)으로 시간별 온도·가시거리·CO 분포 계산
+ · 재실자 위치에서 위 기준 중 하나라도 초과하는 시점 = ASET
+
+(2) RSET 구성 요소
+
+ RSET = t_det + t_warn + t_pre + t_travel
+
+ ① t_det (감지 시간, Detection Time)
+  · 화재 발생 ~ 화재감지기 작동까지의 시간
+  · 감지기 종류, 설치 위치, 화재 성장률에 따라 결정
+
+ ② t_warn (경보 시간, Warning Time)
+  · 감지기 작동 ~ 재실자가 경보 인지까지의 시간
+  · 경보 신뢰도, 각성 여부(취침 중), 소음 환경에 따라 변동
+
+ ③ t_pre (사전행동 시간, Pre-movement Time)
+  · 경보 인지 ~ 실제 피난 시작까지의 시간
+  · 의사결정, 소지품 챙기기, 타인 확인 등 행동 포함
+  · 인적 요인에 따라 가장 변동폭이 큰 구간
+
+ ④ t_travel (이동 시간, Travel Time)
+  · 피난 시작 ~ 안전 장소 도달까지의 시간
+  · 이동 속도, 피난 경로 길이, 군집 혼잡도(Queuing) 결정
+
+(3) ASET < RSET × 안전율 시 개선 방안
+
+ ▶ ASET 증가 방안 (화재 성장 지연, 연기 배출 강화)
+  · 스프링클러 설치/조기 반응형(ESFR) 헤드 교체
+  · 제연설비 강화 (배기량 증대, 수직 구획 강화)
+  · 가연물 저감, 내장재 불연화
+  · 방화구획 강화로 화재 성장 억제
+
+ ▶ RSET 감소 방안 (피난 시간 단축)
+  · 감지기 고감도화 (t_det 감소): 아날로그·다신호 감지기 적용
+  · 음성경보 도입 (t_warn 감소): 비상방송의 명확한 안내 메시지
+  · 피난 유도 강화 (t_pre 감소): 피난 훈련, 유도등·유도표지 보강
+  · 피난 경로 개선 (t_travel 감소): 피난 출구 증설, 계단 폭 확대
+
+ ▶ 안전율 기준
+  · 일반적으로 ASET ≥ RSET × 1.5 (국내 성능위주설계 가이드라인)`
+    },
+    {
+      number: 3, points: 25,
+      text: `<strong>유도등 및 비상조명등</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '유도등의 종류(피난구·통로·객석유도등)와 각 설치 기준을 설명하시오.' },
+        { label: '(2)', text: '유도등의 3선식 배선 방식과 2선식 배선 방식의 차이를 설명하시오.' },
+        { label: '(3)', text: '비상조명등의 설치 대상, 조도 기준, 예비전원 기준을 설명하시오.' },
+      ],
+      answer: `【3】 유도등 및 비상조명등
+
+(1) 유도등 종류 및 설치 기준
+
+① 피난구유도등(Exit Sign)
+ · 피난구 또는 피난 경로로 사용되는 출입구 상단에 설치
+ · 표시면: 녹색 바탕에 흰색 화살표 + 인체 픽토그램
+ · 설치 위치: 출입구 상단 0.15m 이내 또는 출입구 인근 벽면
+ · 크기: 대형(A급), 중형(B급), 소형(C급)
+
+② 통로유도등(Directional Exit Sign)
+ · 피난통로(복도·계단)에 설치하여 피난 방향 표시
+ · 설치 간격: 복도 구부러진 곳, 분기점, 20m 이하 간격
+ · 설치 높이: 바닥으로부터 1m 이하 (복도통로유도등)
+   또는 천장 부근 (계단통로유도등)
+ · 바닥매립형: 바닥에 매립하여 연기 속에서도 식별
+
+③ 객석유도등
+ · 공연장·집회장 등 객석 내 통로에 설치
+ · 설치 위치: 객석 통로 바닥 또는 통로 아랫부분
+ · 조도: 0.2 lux 이상
+
+(2) 3선식 vs 2선식 배선 방식
+
+ ▶ 3선식 배선
+  · 전원선(L), 중성선(N), 점등제어선(S) 3선 사용
+  · 평상시: 충전만, 소등 상태 유지 (에너지 절약)
+  · 화재 시 또는 정전 시: 제어선 신호에 의해 자동 점등
+  · 적용: 일반적인 대부분의 유도등
+
+ ▶ 2선식 배선
+  · 전원선(L), 중성선(N) 2선만 사용
+  · 평상시에도 항상 점등 상태 유지
+  · 구조 단순, 배선 공사 간단
+  · 전력 소비 높음
+  · 적용: 소규모 건물, 단순 설치
+
+ ▶ 차이 요약
+  구분     │ 3선식          │ 2선식
+  ─────────┼────────────────┼──────────────────
+  평상시   │ 소등(충전)     │ 점등
+  화재 시  │ 자동 점등      │ 계속 점등
+  전력     │ 절약           │ 소모 큼
+  복잡도   │ 제어회로 필요  │ 단순
+
+(3) 비상조명등 설치 대상·조도·예비전원
+
+▶ 설치 대상 (소방시설법 시행령)
+ · 지하층·무창층·11층 이상 층 (바닥면적 합계 관계없이)
+ · 다중이용업소 영업장 내부 피난통로
+ · 지하가, 터널, 발전시설
+
+▶ 조도 기준
+ · 비상조명등 조도: 피난통로·거실에서 바닥면 수평면조도 1 lux 이상
+ · 피난통로 교차점: 10 lux 이상 (개정 추세 반영)
+ · 유도등 겸용: 유도등의 조도가 기준 충족 시 대체 가능
+
+▶ 예비전원 기준
+ · 축전지(배터리) 내장형: 상용전원 차단 시 20분 이상 점등 유지
+ · 지하층·무창층·11층 이상: 60분 이상 (개정 강화)
+ · 충전 시간: 24시간 이내 완전 충전
+ · 충전 상태 표시: LED 표시등으로 정상·이상 표시`
+    },
+    {
+      number: 4, points: 25,
+      text: `고층건축물의 <strong>피난 안전구역(Refuge Area)</strong>과 <strong>피난시설</strong>에 대하여 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '피난안전구역의 설치 기준(「건축물의 피난·방화구조 등의 기준에 관한 규칙」)을 설명하시오.' },
+        { label: '(2)', text: '피난안전구역에 설치하여야 하는 소방시설 및 피난 보조 설비를 나열하고 설명하시오.' },
+        { label: '(3)', text: '완강기, 공기안전매트, 구조대의 사용법과 설치 기준을 비교 설명하시오.' },
+      ],
+      answer: `【4】 피난안전구역 및 피난시설
+
+(1) 피난안전구역 설치 기준
+
+▶ 설치 대상
+ · 30층 이상 또는 높이 120m 이상 건축물에 의무 설치
+
+▶ 설치 위치·간격
+ · 최대 30개 층마다 1개소 이상 설치
+ · 피난층(지상 1층 등) 또는 지상으로 통하는 층에 최소 1개소
+ · 예: 60층 건물 → 중간층(30F), 최상부층 근처 2개소 이상
+
+▶ 면적 기준
+ · 피난안전구역 면적 = 피난 사용 인원 × 0.5 m² 이상
+ · 피난 사용 인원: 피난안전구역 상부 층의 재실자 수 기준
+
+▶ 구조 기준
+ · 내화구조의 바닥·벽·천장으로 구획
+ · 피난안전구역으로 통하는 계단: 특별피난계단 기준 준용
+ · 피난안전구역 내부 마감: 불연재료
+
+(2) 피난안전구역 설치 소방시설
+
+① 제연설비: 급기가압 방식으로 연기 침입 차단
+② 비상조명등: 정전 시에도 조도 유지 (10 lux 이상)
+③ 소화기: 이동식 소화기 비치
+④ 휴대용비상조명등: 개인별 사용 가능한 조명 기구
+⑤ 비상방송 및 통신설비: 소방관련 통신, 방송 수신 가능
+⑥ 인명구조기구
+ · 공기호흡기: 소방대 진입·구조 시 사용
+ · 방열복, 공기안전매트 비치
+⑦ 피난유도선: 피난안전구역까지 유도
+⑧ 승강기: 피난용 승강기 1개 이상 (피난안전구역 경유)
+⑨ 식수, 응급처치용품 (대피 장기화 대비)
+
+(3) 완강기·공기안전매트·구조대 비교
+
+ 구분         │ 완강기           │ 공기안전매트        │ 구조대
+ ─────────────┼──────────────────┼──────────────────────┼───────────────────
+ 원리         │ 조속기로 속도조절│ 충격 흡수 공기 매트│ 포지 미끄럼대
+ 사용법       │ 벨트 착용 후 강하│ 낙하 후 착지       │ 포 내부로 미끄러짐
+ 강하 속도    │ 16~150 cm/s      │ 자유낙하(매트가 흡수)│ 조절 가능
+ 반복 사용    │ 가능 (한 번에 1인)│ 가능 (다수 동시)   │ 가능 (다수 순차)
+ 설치 위치    │ 창문 또는 발코니 │ 건물 외부 지상     │ 건물 외벽
+ 설치 층수    │ 2~10층           │ 2~5층 (제한적)     │ 피난층 이상
+ 주요 사용자  │ 자력 피난 가능자 │ 고층 창문 투하 대피│ 노약자·장애인 가능
+
+▶ 완강기 설치 기준
+ · 설치 높이: 지상 2층 이상 10층 이하 (11층 이상은 공기안전매트 등 추가)
+ · 강하 거리: 설치 창문에서 지면까지 실제 높이 기준 로프 준비
+ · 설치 간격: 구조대·완강기 합쳐 개구부 수 기준으로 배치
+
+▶ 공기안전매트
+ · 지상에서 소방대가 설치 운용
+ · 압축 공기 충전 시간: 수십 초 이내
+ · 5층 이하에서 주로 유효 (고층 낙하 시 충격에너지 한계)`
+    },
+    {
+      number: 5, points: 25,
+      text: `<strong>특별피난계단 및 피난계단</strong>의 구조 기준에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '피난계단과 특별피난계단의 설치 대상과 구조 기준을 비교 설명하시오.' },
+        { label: '(2)', text: '특별피난계단의 부속실(전실) 구조 기준을 설명하시오.' },
+        { label: '(3)', text: '계단의 너비·경사·챌판 기준 및 피난 시 계단 이용 문제점과 대책을 설명하시오.' },
+      ],
+      answer: `【5】 특별피난계단 및 피난계단
+
+(1) 피난계단 vs 특별피난계단 설치 대상 및 구조 비교
+
+▶ 설치 대상 (건축법 시행령 제35조)
+ · 피난계단: 5층 이상 또는 지하 2층 이하로 통하는 직통계단
+ · 특별피난계단: 11층 이상 층 또는 지하 3층 이하로 통하는 직통계단
+
+▶ 구조 기준 비교
+ 구분          │ 피난계단                    │ 특별피난계단
+ ──────────────┼─────────────────────────────┼──────────────────────────────
+ 마감재        │ 불연재료                     │ 불연재료
+ 내부 개구부   │ 방화문 설치                  │ 방화문 설치 (갑종)
+ 채광·환기     │ 계단실 내 외기 개구부 필요   │ 부속실(전실)을 통한 진입
+ 전실(부속실)  │ 불필요                       │ 필수 (별도 전실 구조)
+ 배연설비      │ 불필요                       │ 전실에 배연설비 필수
+
+(2) 특별피난계단 부속실(전실) 구조 기준
+
+▶ 구성
+ · 계단실 ← 방화문 ← 부속실(전실) ← 방화문 ← 복도(거실)
+
+▶ 부속실 구조 기준
+ · 면적: 각 층마다 6 m² 이상 (비상용 엘리베이터 승강장 겸용 시 10 m² 이상)
+ · 마감: 내부 마감재 불연재료
+ · 채광: 외기에 접하는 창문 또는 배연설비 설치
+ · 제연: 「제연설비 화재안전기준」에 따른 급기가압방식 적용
+   - 차압: 40 Pa 이상 (방화문 폐쇄 시)
+   - 방연풍속: 0.5 m/s 이상 (방화문 개방 시)
+ · 방화문: 갑종 방화문 (자동폐쇄장치, 상시 닫힘)
+
+(3) 계단 치수 기준 및 피난 문제점 대책
+
+▶ 치수 기준 (건축법 시행령 제48조)
+ · 너비: 1.2 m 이상 (공동주택), 1.5 m 이상 (문화·집회시설)
+ · 챌판(단 높이): 18 cm 이하
+ · 디딤판(단 너비): 26 cm 이상
+ · 경사: 챌판/디딤판 비율로 경사 결정
+
+▶ 피난 시 문제점
+ · 계단 군집: 하강 인원 집중 → 보행 속도 저하 (0.3~0.5 m/s)
+ · 반대 방향 충돌: 소방관 상승 + 재실자 하강 충돌
+ · 연기 침투: 방화문 개방 시 연기 유입
+ · 고층 피로: 장시간 계단 하강으로 피난 포기
+
+▶ 대책
+ · 핸드레일 양측 설치, 야광 유도선 계단 디딤판 설치
+ · 소방관 전용 계단 별도 지정 (고층 건물)
+ · 방화문 자동폐쇄장치 + 연기감지기 연동
+ · 피난 안전구역에서 분산 대피 (일시적 피난처 확보)`
+    },
+    {
+      number: 6, points: 25,
+      text: `<strong>자동화재탐지설비의 감지기</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '열감지기의 종류(차동식·정온식·보상식)와 작동 원리를 설명하시오.' },
+        { label: '(2)', text: '연기감지기의 종류(이온화식·광전식)와 작동 원리, 적용 장소를 설명하시오.' },
+        { label: '(3)', text: '감지기의 설치 기준(부착 높이, 감지 면적)을 설명하시오.' },
+      ],
+      answer: `【6】 자동화재탐지설비 감지기
+
+(1) 열감지기 종류 및 작동 원리
+
+① 차동식(差動式, Rate-of-Rise)
+ · 작동 원리: 주위 온도 상승률이 일정값(8~12℃/min) 초과 시 작동
+ · 구성: 공기실 + 다이어프램 + 리크구멍
+ · 공기 팽창 → 다이어프램 만곡 → 접점 ON
+ · 특징: 완만한 온도 상승(훈소)에는 불응 → 리크구멍으로 공기 방출
+ · 종류: 스포트형, 분포형(공기관식, 열전대식, 열반도체식)
+
+② 정온식(定溫式, Fixed Temperature)
+ · 작동 원리: 주위 온도가 설정 온도(공칭 작동 온도) 이상 시 작동
+ · 바이메탈(Bimetal) 또는 가용합금(Fusible Alloy) 사용
+ · 특징: 급격한 온도 변화에는 지연 가능, 주방·보일러실 적합
+ · 종류: 스포트형, 감지선형(Sensing Cable)
+
+③ 보상식(補償式, Combined)
+ · 차동식 + 정온식 복합 — 어느 쪽이 먼저 작동해도 신호 발생
+ · 두 방식 모두 동작해야 하는 것이 아닌 둘 중 하나 작동 시 신호
+ · 오작동·지연 작동 보완 → 가장 신뢰성 높음
+
+(2) 연기감지기 종류 및 적용
+
+① 이온화식(Ionization)
+ · 원리: 방사성 물질(Am-241)로 이온화된 공기 + 연기 입자 유입 → 이온전류 감소 → 작동
+ · 특징: 눈에 보이지 않는 작은 연기 입자에 민감
+ · 적합: 훈소 초기, 전기 배선 화재 (연기 입자 작음)
+ · 주의: 방사성 물질 포함 → 폐기 시 규정 처리
+
+② 광전식(Photoelectric)
+ · 산란광형: 연기 입자에 의한 빛 산란 → 수광소자 신호 증가 → 작동
+ · 감광형: 연기에 의한 빛 감쇠 → 수광소자 신호 감소 → 작동 (빔형)
+ · 특징: 눈에 보이는 큰 연기 입자에 민감
+ · 적합: 연기 다량 발생 화재, 침실·복도 (일반적 가장 많이 사용)
+
+▶ 적용 장소
+ · 이온화식: 반도체 공장, 전기실 (눈에 보이지 않는 가스형 연기)
+ · 광전식 스포트형: 일반 거실, 복도, 계단 (연기 가시입자 검출)
+ · 광전식 분리형(빔형): 천장 높은 대공간 (체육관, 격납고)
+
+(3) 감지기 설치 기준
+
+▶ 부착 높이별 감지기 종류
+ 부착 높이     │ 적합 감지기
+ ──────────────┼──────────────────────────────────
+ 4 m 미만      │ 차동·정온·보상·이온화·광전식 모두
+ 4~8 m 미만   │ 차동식(2종), 보상식(2종), 정온식(특종), 광전식(1·2종)
+ 8~15 m 미만  │ 차동식(1종), 이온화·광전식(1종), 불꽃감지기
+ 15~20 m 미만 │ 이온화·광전식(1종), 불꽃감지기
+ 20 m 이상    │ 불꽃감지기
+
+▶ 감지 면적 기준 (4 m 미만, 주요)
+ · 차동식 스포트형 1종: 90 m²/개
+ · 차동식 스포트형 2종: 70 m²/개
+ · 정온식 스포트형 특종: 70 m²/개
+ · 연기감지기 1종·2종: 150 m²/개 (4~20 m)
+
+▶ 설치 제외 장소
+ · 부식성·먼지 다량 발생 장소 (감지기 오염)
+ · 주방·목욕탕 (열기·습기 → 오작동) → 방수형 또는 차동식 대신 정온식 사용`
+    },
+    {
+      number: 7, points: 25,
+      text: `<strong>유도등 및 비상조명등</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '유도등의 종류(피난구유도등·통로유도등·객석유도등)와 설치 기준을 설명하시오.' },
+        { label: '(2)', text: '비상조명등의 설치 기준과 비상전원 종류 및 용량을 설명하시오.' },
+        { label: '(3)', text: '유도등의 3선식 배선 방식과 점등 방식(상시·비상시)을 설명하시오.' },
+      ],
+      answer: `【7】 유도등 및 비상조명등
+
+(1) 유도등 종류 및 설치 기준
+
+① 피난구유도등 (출구 표시)
+ · 위치: 피난구, 비상문, 비상구 상단 또는 측면
+ · 크기: 대형(주요 출구), 중형·소형 (보조 출구)
+ · 설치 높이: 출입구 상단에서 0.15 m 이내 또는 문 중심으로부터 위
+ · 표시: 녹색 바탕 + 백색 화살표·사람 픽토그램
+
+② 통로유도등 (복도·통로 방향 표시)
+ · 위치: 복도, 거실 통로, 계단
+ · 복도통로유도등: 진행 방향 표시, 바닥면으로부터 높이 1 m 이하 (바닥 매입형 가능)
+ · 계단통로유도등: 각 층 계단참, 바닥면 또는 디딤판 면 조명
+ · 거실통로유도등: 거실 각 부분에서 유도등 방향 인식 가능하도록
+
+③ 객석유도등 (공연장 등)
+ · 위치: 객석 통로 바닥면 또는 좌석 측면 (0.5 m 이하)
+ · 조도: 0.2 lux 이상
+
+(2) 비상조명등 설치 기준 및 비상전원
+
+▶ 설치 대상
+ · 지하층·무창층 또는 11층 이상의 층에 설치
+ · 숙박시설·판매시설 등 일정 규모 이상
+
+▶ 조도 기준
+ · 바닥면 수평 조도: 1 lux 이상 (피난통로)
+ · 비상전원 작동 시 조도 유지 시간: 20분 이상
+
+▶ 비상전원 종류
+ · 내장형 배터리: 소형·간단, 20분 이상 용량
+ · 외부 비상전원 연결형: 축전지설비, 비상발전기
+ · 충전 완료 표시등 설치 (상시 충전 상태 확인)
+
+(3) 유도등 3선식 배선 및 점등 방식
+
+▶ 2선식 배선 (상시 점등)
+ · 배선: 상시 전원 2선으로 구성
+ · 정상: 상시 점등, 정전 시 내장 배터리로 자동 전환 유지
+ · 단점: 배터리 방전 관리 필요, 항상 점등으로 전력 소비
+
+▶ 3선식 배선 (일반·비상 겸용)
+ · 배선: 상시전원 1선 + 비상전원 1선 + 공통 1선
+ · 정상 시: 상시전원으로 점등 (또는 소등 — 용도에 따라)
+ · 화재 또는 정전 시: 수신기 신호 → 비상전원 회로 자동 전환 → 점등
+ · 장점: 평상시 소등 가능 → 에너지 절약 (공연장, 영화관)
+ · 화재 시: 감지기 작동 → 수신기 출력 신호 → 3선식 전환 회로 동작 → 점등
+
+▶ 적용 기준
+ · 항상 점등 필요 장소: 2선식 (복도, 계단)
+ · 평상시 어두운 환경 필요 장소: 3선식 (공연장, 영화관, 암실)`
+    },
+    {
+      number: 8, points: 25,
+      text: `<strong>비상방송설비 및 자동화재속보설비</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '비상방송설비의 구성 및 설치 기준(음량, 도달 범위, 확성기 설치)을 설명하시오.' },
+        { label: '(2)', text: '자동화재속보설비의 작동 원리와 통보 방법을 설명하시오.' },
+        { label: '(3)', text: '방재센터(수신기반)와 비상방송의 연동 방식을 설명하시오.' },
+      ],
+      answer: `【8】 비상방송설비 및 자동화재속보설비
+
+(1) 비상방송설비 구성 및 설치 기준
+
+▶ 구성 요소
+ · 앰프(증폭기): 음성 신호 증폭, 비상전원 내장
+ · 마이크로폰: 수동 음성 방송용
+ · 확성기(스피커): 각 층·구역에 분산 설치
+ · 배선: 내화배선 (600V 내열 절연 전선 이상)
+ · 음원 장치: 화재 경보음, 사전 녹음 음성 자동 재생
+
+▶ 설치 기준
+ · 음량: 확성기 중심으로부터 1 m 거리에서 92 dB 이상
+ · 도달 범위: 각 층의 각 부분에서 확성기까지 수평거리 25 m 이하
+ · 확성기 설치 위치: 복도·통로·청중이 있는 곳 (바닥 제외)
+ · 우선순위: 비상방송이 일반방송보다 항상 우선 동작
+
+▶ 층별 방송 기준
+ · 화재층 + 직상 2개 층 우선 방송 (30층 이상 초고층)
+ · 11층 이상 건축물: 발화층 + 직상층 방송 후 전층 방송
+
+(2) 자동화재속보설비
+
+▶ 작동 원리
+ · 자동화재탐지설비 수신기 → 화재 신호 → 속보설비 자동 작동
+ · 전화망(PSTN) 또는 인터넷 회선을 통해 소방서에 자동 통보
+
+▶ 통보 방법
+ · 자동(Automatic): 감지기 작동 즉시 소방서 119에 자동 신고
+   - 음성 메시지: 건물명, 주소, 발화 층 등 자동 송출
+ · 수동(Manual): 방재센터 요원이 직접 수동 조작 가능
+ · 응답 확인: 소방서 수신 확인 신호 회신
+
+▶ 설치 대상 (소방시설법 시행령)
+ · 근린생활시설·위락시설 등 지하층·무창층 500 m² 이상
+ · 노유자시설, 의료시설, 숙박시설 등
+
+(3) 방재센터와 비상방송 연동
+
+▶ 수신기(P형·R형)와 연동
+ · P형 수신기: 공통신호 방식 — 층별 화재구역 식별, 해당 층 방송 트리거
+ · R형 수신기: 개별신호 방식 — 발화 지점 정확히 식별, 자동으로 층별 우선 방송
+
+▶ 연동 순서
+ 1. 감지기 or 발신기 작동
+ 2. 수신기 화재 신호 수신
+ 3. 수신기 → 비상방송 앰프에 화재 신호 전달
+ 4. 해당 층 + 직상층 확성기 자동 경보음 방송
+ 5. 방재센터 요원 확인 후 음성 안내 방송 추가
+
+▶ 일반방송 자동 차단
+ · 화재 신호 수신 시 일반 음악·안내방송 즉시 차단
+ · 비상방송 채널 자동 전환 → 경보음 및 음성 안내 우선 출력`
+    },
+    {
+      number: 9, points: 25,
+      text: `<strong>부속실 제연설비</strong>의 설계 기준에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '부속실 제연의 목적과 급기가압방식의 원리를 설명하시오.' },
+        { label: '(2)', text: '차압, 방연풍속, 급기량 산정 방법을 설명하시오.' },
+        { label: '(3)', text: '과압 방지장치(과압방지 댐퍼, 플랩댐퍼)의 종류와 역할을 설명하시오.' },
+      ],
+      answer: `【9】 부속실 제연설비
+
+(1) 목적 및 급기가압방식 원리
+
+▶ 목적
+ · 특별피난계단 부속실(전실)에 신선한 공기를 공급하여 양압(正壓) 유지
+ · 화재 층의 연기가 계단실 및 부속실로 침투하는 것을 방지
+ · 피난 경로(계단실) 안전성 확보
+
+▶ 급기가압방식 원리
+ · 외부 또는 청정 공기를 팬으로 부속실에 강제 공급 → 부속실 내 압력 상승
+ · 부속실 > 복도(화재 층) 압력 → 연기 역류 방지
+ · 방화문 개방 시에도 일정 방연풍속 이상 유지하여 연기 차단
+
+▶ 제연구역 종류 (「제연설비의 화재안전기준」)
+ · 계단실 단독 가압: 계단실만 급기
+ · 부속실 단독 가압: 부속실(전실)만 급기 — 가장 일반적
+ · 계단실+부속실 동시 가압: 두 구역 모두 급기
+
+(2) 차압·방연풍속·급기량 산정
+
+▶ 차압 기준
+ · 방화문 폐쇄 상태: 부속실과 인접 공간 차압 ≥ 40 Pa
+ · 스프링클러 설치 건물: 12.5 Pa 이상 (스프링클러로 화재 억제)
+ · 과압 상한: 방화문 개방력 110 N 이하 (노약자 개방 가능)
+
+▶ 방연풍속 기준
+ · 방화문 개방 상태: 개구부를 통과하는 풍속 ≥ 0.5 m/s
+ · 계단실+부속실 동시 가압: 0.7 m/s 이상
+
+▶ 급기량 산정
+ Q = A × V × N
+ · A: 방화문 개구부 면적 [m²]
+ · V: 방연풍속 [m/s]
+ · N: 동시 개방 문 수 (설계 기준: 1개층 방화문 동시 개방 가정)
+ · 누설 보정: 배관·창문 등을 통한 공기 누설량 추가
+
+(3) 과압 방지장치
+
+▶ 과압 발생 원인
+ · 방화문 모두 폐쇄 시 급기량 > 누설량 → 부속실 압력 과도 상승
+ · 과압 시 방화문 개방 불가 → 피난 방해
+
+▶ 과압 방지 장치 종류
+
+① 과압방지 댐퍼 (Relief Damper)
+ · 부속실 벽면에 설치 → 설정 압력 초과 시 자동 개방 → 과잉 공기 배출
+ · 압력 설정 범위: 40~110 Pa
+ · 스프링 압력으로 작동 (전원 불필요)
+
+② 플랩댐퍼 (Flap Damper)
+ · 경첩형 판으로 구성 → 압력 차이로 판이 열리며 공기 배출
+ · 구조 단순, 신뢰성 높음
+
+③ 가변풍량(VAV: Variable Air Volume) 방식
+ · 급기팬의 풍량을 차압 측정값에 따라 자동 조절
+ · 차압 < 기준: 풍량 증가 / 차압 > 기준: 풍량 감소
+ · 에너지 효율 최적, 제어 정밀도 높음 — 현재 권장 방식`
+    },
+    {
+      number: 10, points: 25,
+      text: `<strong>소방시설의 내진 설계</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '소방시설 내진 설계의 법적 근거와 적용 대상을 설명하시오.' },
+        { label: '(2)', text: '수계소화설비 배관의 내진 설계 기준(흔들림 방지 버팀대 간격, 종류)을 설명하시오.' },
+        { label: '(3)', text: '소방 기기(펌프, 수조)의 내진 고정 방법과 플렉시블 조인트 적용 기준을 설명하시오.' },
+      ],
+      answer: `【10】 소방시설 내진 설계
+
+(1) 법적 근거 및 적용 대상
+
+▶ 법적 근거
+ · 「소방시설의 내진설계 기준」(소방청 고시)
+ · 소방시설법 제9조의2 (내진설계 기준 적용)
+ · 지진·화산재해대책법
+
+▶ 적용 대상
+ · 연면적 1,000 m² 이상 소방시설 설치 대상물 (소방시설법 시행령)
+ · 내진 설계 기준 적용 설비: 수계·가스계·분말소화설비, 옥내외소화전설비, 자동화재탐지설비 등
+
+▶ 내진 설계 목표
+ · 설계 지진 발생 시에도 소방시설이 정상 작동할 수 있는 구조적 건전성 유지
+
+(2) 배관 내진 설계 기준
+
+▶ 흔들림 방지 버팀대(Sway Brace)
+
+① 종방향 버팀대: 배관 축 방향(종방향) 하중 지지
+ · 설치 간격: 배관 구경과 무관하게 12 m 이내마다
+
+② 횡방향 버팀대: 배관 축 직각 방향(횡방향) 하중 지지
+ · 설치 간격: 배관 구경과 무관하게 12 m 이내마다 (종·횡 동시 설치)
+
+③ 4방향(사방) 버팀대: 종·횡 방향 동시 지지
+ · 배관 말단부(Dead End), 구경 변경 지점, 가지관 분기점에 설치
+
+▶ 버팀대 간격 예외
+ · 배관 구경 65 mm 미만: 버팀대 간격 완화 가능
+ · 분기 배관, 소구경 배관에 적용
+
+(3) 소방 기기 내진 고정 및 플렉시블 조인트
+
+▶ 펌프 내진 고정
+ · 기초 볼트(앵커): 슬래브에 매립 또는 케미컬 앵커 사용
+ · 방진 패드: 펌프 진동이 구조체로 전달 방지 (고무 방진 마운트)
+ · 내진 스토퍼: 펌프 가동·지진 시 과도한 수평 이동 방지
+   - 스토퍼 하중: 기기 중량 × 설계 스펙트럼 가속도
+
+▶ 수조 내진 고정
+ · 수조 본체: 기초 앵커 4곳 이상 고정
+ · 만수 하중 고려: 내용물(물) 무게 포함한 전도 안전율 검토
+
+▶ 플렉시블 조인트(Flexible Joint) 적용 기준
+ · 펌프 흡입측·토출측 직후에 설치 (펌프와 배관 사이)
+ · 목적: 펌프 진동, 지진 변위가 배관 계통으로 전달 방지
+ · 종류: 금속 벨로우즈형, 고무 신축형
+ · 설치 수량: 흡입측 1개 + 토출측 1개 이상
+ · 허용 변위: 배관 구경별 규정 이내 (제조사 사양 확인)`
+    }
+  ],
+
+  // ── 세트 4: 위험물·전기 ─────────────────────
+  [
+    {
+      number: 1, points: 25,
+      text: `「위험물안전관리법」 상 위험물의 <strong>분류와 화재 특성</strong>에 대하여 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '위험물의 6가지 유별 분류와 각 유별의 위험성 특성을 설명하시오.' },
+        { label: '(2)', text: '제4류 위험물의 인화점별 세부 분류(특수인화물~제4석유류)와 인화점·발화점 기준을 설명하시오.' },
+        { label: '(3)', text: '제4류 위험물 옥외탱크저장소의 방유제 설치 기준을 설명하시오.' },
+      ],
+      answer: `【1】 위험물 분류 및 화재 특성
+
+(1) 위험물 6가지 유별 분류
+
+ 유별    │ 성질                │ 대표 물질               │ 화재 특성
+ ────────┼─────────────────────┼─────────────────────────┼──────────────────────────
+ 제1류   │ 산화성 고체          │ 염소산나트륨, 과산화물   │ 자체 산소 공급, 다른 물질과 혼합 시 폭발
+ 제2류   │ 가연성 고체          │ 황, 철분, 마그네슘       │ 점화 쉬움, 연소 빠름 (금속분: 주수 금지)
+ 제3류   │ 자연발화성·금수성    │ 칼륨, 나트륨, 알킬알루미늄│ 물 접촉 시 발화·폭발, 공기 중 자연발화
+ 제4류   │ 인화성 액체          │ 가솔린, 알코올, 등유     │ 증기 발생·폭발 위험, 비수용성 대부분
+ 제5류   │ 자기반응성 물질      │ 유기과산화물, 니트로화합물│ 자기연소·폭발, 질식·냉각 소화 어려움
+ 제6류   │ 산화성 액체          │ 과염소산, 질산, 과산화수소│ 다른 물질 연소 촉진, 금속 부식성
+
+(2) 제4류 위험물 세부 분류
+
+ 품명             │ 인화점              │ 비점/발화점          │ 대표 물질
+ ─────────────────┼─────────────────────┼──────────────────────┼────────────────────
+ 특수인화물        │ -20℃ 이하           │ 발화점 100℃ 이하 or  │ 이황화탄소, 디에틸에테르
+                  │                     │ 비점 40℃ 이하        │
+ 제1석유류(비수용성)│ 21℃ 미만           │                      │ 가솔린, 아세톤(비수용성)
+ 제1석유류(수용성) │ 21℃ 미만           │                      │ 아세톤, MEK (수용성)
+ 알코올류          │ 11~60℃ (탄소수 1~3)│                      │ 메탄올, 에탄올, 프로판올
+ 제2석유류(비수용성)│ 21℃ 이상 70℃ 미만 │                      │ 등유, 경유
+ 제2석유류(수용성) │ 21℃ 이상 70℃ 미만 │                      │ 빙초산, 히드라진
+ 제3석유류(비수용성)│ 70℃ 이상 200℃ 미만│                      │ 중유, 클레오소트유
+ 제4석유류         │ 200℃ 이상 250℃ 미만│                      │ 기어유, 실린더유
+ 동식물유류        │ 250℃ 미만           │                      │ 아마인유, 야자유
+
+(3) 옥외탱크저장소 방유제 기준
+
+▶ 방유제(防油堤, Dike) 설치 목적
+ · 탱크 파손 시 유출된 위험물의 주변 확산 방지
+ · 화재 시 연소 범위 제한
+
+▶ 설치 기준 (위험물안전관리법 시행규칙)
+ · 방유제 용량
+  - 탱크 1기: 탱크 용량의 110% 이상
+  - 탱크 2기 이상: 최대 탱크 용량의 110% 이상
+ · 방유제 높이: 0.5 m 이상 ~ 3 m 이하
+ · 방유제 내 면적: 8만 m² 이하
+ · 방유제 두께: 토제(土堤) 0.2 m 이상, 콘크리트 0.15 m 이상
+ · 방유제 내 탱크 수: 10기 이하 (인화점 70℃ 이상은 20기 이하)
+ · 간막이둑: 각 탱크 주변에 탱크 용량 10% 이상 용량의 간막이둑
+ · 배수구: 방유제 외부로 개폐 가능한 배수밸브 설치`
+    },
+    {
+      number: 2, points: 25,
+      text: `전기화재의 <strong>발생 원인과 예방 대책</strong>에 대하여 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '전기화재의 주요 발생 원인 5가지를 설명하시오. (단락, 과부하, 누전, 접촉불량, 정전기)' },
+        { label: '(2)', text: '아크(Arc) 화재의 발생 메커니즘과 아크 결함 차단기(AFCI)의 원리를 설명하시오.' },
+        { label: '(3)', text: 'E급 전기화재에 적응성 있는 소화약제 3가지와 각각의 소화 원리를 설명하시오.' },
+      ],
+      answer: `【2】 전기화재 원인 및 예방
+
+(1) 전기화재 주요 발생 원인 5가지
+
+① 단락(Short Circuit, 합선)
+ · 전선 피복 손상, 연결부 접촉으로 도체 간 직접 연결
+ · 수천 암페어 과전류 → 순간 고열 발생 → 주변 가연물 착화
+ · 용융흔(Melted Mark) 형성: 화재 조사 근거
+
+② 과부하(Overload)
+ · 허용 전류 초과 사용 → 줄 열(I²R)로 전선 피복 열화·용융
+ · 멀티탭 문어발 사용, 과부하 설비 연결이 주원인
+ · 차단기 용량 초과 또는 퓨즈 불량 시 보호 미작동
+
+③ 누전(Ground Fault / Leakage Current)
+ · 전선 피복 손상으로 전류가 의도치 않은 경로(대지)로 흐름
+ · 누전 경로에 가연물 존재 시 발열·착화
+ · 누전차단기(ELB, ELCB)로 30 mA에서 차단 (0.03초 이내)
+
+④ 접촉불량(Poor Connection)
+ · 접속 부위 산화, 느슨한 조임, 이물질로 접촉 저항 증가
+ · 국부 발열 → 장기간에 걸쳐 주변 가연물 착화
+ · 트래킹(Tracking): 절연체 표면 탄화 경로 형성
+
+⑤ 정전기(Static Electricity)
+ · 두 물체 마찰·박리 시 전하 축적
+ · 방전 시 불꽃 발생 → 가연성 가스·분진 점화
+ · 석유류 이송, 분체 취급, 인쇄 공정에서 위험
+ · 접지·본딩, 가습, 대전방지제로 예방
+
+(2) 아크 화재 메커니즘 및 AFCI
+
+▶ 아크 화재 메커니즘
+ · 전선 손상, 느슨한 연결 → 미세 불꽃(아크) 반복 발생
+ · 아크 온도: 수천 ℃ → 주변 가연물 착화 가능
+ · 직렬 아크(Series Arc): 전선 단선 부위에서 발생
+ · 병렬 아크(Parallel Arc): 두 도체 간 방전
+ · 일반 차단기로는 검출 불가 (전류가 정격 이하)
+
+▶ AFCI(Arc Fault Circuit Interrupter, 아크 결함 차단기)
+ · 아크 방전 특유의 전류 파형(고주파 성분, 불규칙 피크) 감지
+ · 마이크로프로세서로 아크 패턴과 정상 패턴 구분
+ · 아크 감지 시 회로 차단 (수 ms 이내)
+ · 미국 NEC 210.12: 침실 회로 AFCI 의무화 (국내 도입 논의 중)
+
+(3) E급 전기화재 소화약제
+
+▶ E급 전기화재: 통전 중인 전기설비 화재
+
+① 이산화탄소(CO₂)
+ · 전기 비전도성 → 감전 위험 없음
+ · 소화 원리: 질식 + 냉각
+ · 방전거리: 0.9 m 이상 확보 (30 kV 이하 전기설비)
+ · 잔류물 없음 → 정밀 전자장비 보호에 적합
+
+② 할론 대체 청정소화약제 (HFC-227ea, FK-5-1-12 등)
+ · 전기 비전도성, 잔류물 없음
+ · 소화 원리: 냉각 + (연쇄반응 억제)
+ · 할론 1301 대체재로 전산실·통신실 고정설비에 많이 사용
+
+③ 분말소화약제 (제3종: 인산암모늄, ABC형)
+ · 소화 원리: 연쇄반응 억제 (부촉매 효과) + 질식
+ · 전기 절연성 양호
+ · 잔류물 심각 → 정밀기기 2차 손상 큼 (전기설비엔 CO₂ 우선)
+ · 35 kV 이하 전기설비 적응성 있음
+
+※ 주수(물)는 E급 화재에 사용 금지: 전기 전도성, 감전 위험`
+    },
+    {
+      number: 3, points: 25,
+      text: `자동화재탐지설비의 <strong>감지기 선택 및 설치</strong>에 대하여 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '차동식·정온식·보상식 열감지기의 작동 원리와 특성을 비교 설명하시오.' },
+        { label: '(2)', text: '광전식·이온화식 연기감지기의 작동 원리와 적합 화재 유형을 설명하시오.' },
+        { label: '(3)', text: '아날로그 감지기(지능형 감지기)의 특성과 기존 온오프형 감지기와의 차이를 설명하시오.' },
+      ],
+      answer: `【3】 자동화재탐지설비 감지기
+
+(1) 열감지기 3종 비교
+
+① 차동식(差動式, Rate-of-Rise Detector)
+ · 작동 원리: 주위 온도 상승률이 일정 값(8~12℃/min) 이상일 때 작동
+ · 원리: 공기 팽창 또는 바이메탈 만곡으로 접점 연결
+ · 특성: 서서히 온도 상승하는 훈소화재는 미감지 가능
+ · 적용: 일반적 화재 성장 환경 (복도, 사무실 등)
+
+② 정온식(定溫式, Fixed Temperature Detector)
+ · 작동 원리: 주위 온도가 일정 온도(공칭 작동 온도) 이상 시 작동
+ · 원리: 바이메탈, 가용납 용해, 공기의 체적 팽창
+ · 공칭 작동 온도: 60·70·80·90·100·110℃ 등 선택
+ · 특성: 완만한 온도 상승에도 정확 감지, 응답 속도 느림
+ · 적용: 주방, 보일러실 등 고온 환경 (차동식 오작동 우려)
+
+③ 보상식(補償式, Combination Detector)
+ · 차동식 + 정온식 기능 복합
+ · 급격한 온도 상승: 차동식 방식으로 조기 감지
+ · 완만한 고온 지속: 정온식 방식으로 감지
+ · 가장 신뢰성 높음, 가격 다소 높음
+
+(2) 연기감지기 비교
+
+① 광전식(光電式, Photoelectric Smoke Detector)
+ · 작동 원리: 발광소자(LED)와 수광소자 사이에 연기 입자가 빛 산란
+   → 산란광 또는 차단 광량 변화로 감지
+ · 산란광형(Side-stream): 입자에 의한 빛 산란 → 수광
+ · 감쇠형(Beam형): 연기에 의한 광량 감소 → 장거리 적용
+
+ · 적합 화재: 훈소 화재(Smoldering), 큰 입자 연기
+ · 오작동 요인: 수증기, 먼지 (일부 환경에서 오보 가능)
+
+② 이온화식(Ionization Smoke Detector)
+ · 작동 원리: 방사성 동위원소(Am-241)로 공기 이온화
+   → 연기 입자가 이온과 결합 → 이온전류 감소 → 경보
+ · 적합 화재: 성장 화재, 작은 입자 연기 (불꽃 화재 초기)
+ · 현재 국내: 방사성 물질 사용으로 신규 설치 제한 추세
+
+(3) 아날로그 감지기 특성
+
+▶ 기존 온오프형 vs 아날로그 감지기
+
+ 구분          │ 온오프형(On/Off)             │ 아날로그(지능형)
+ ──────────────┼──────────────────────────────┼──────────────────────────────
+ 출력 신호     │ 화재/정상 2단계              │ 연속적인 수치(0~100%)
+ 수신기 통신   │ 단순 접점 신호               │ 디지털 통신 (주소 지정)
+ 임계값 설정   │ 제조 시 고정                 │ 수신기에서 소프트웨어로 조정
+ 자기 진단     │ 불가                         │ 가능 (오염도, 고장 감지)
+ 거짓 경보     │ 많음                         │ 적음 (알고리즘 판단)
+ 감지기 주소   │ 구역(Zone) 단위              │ 개별 주소 (Addressable)
+
+▶ 아날로그 감지기 장점
+ · 사전 경보 기능: 화재 경보 전 예비 경보(Pre-alarm) 발신
+ · 감지기 오염 경보: 청소 시기 알림 → 유지보수 효율화
+ · 환경 적응형 알고리즘: 공장·주방 등 환경 변화에 자동 대응
+ · 원격 감도 조정: 수신기에서 개별 감지기 감도 설정 가능`
+    },
+    {
+      number: 4, points: 25,
+      text: `소방시설의 <strong>내진 설계</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '소방시설 내진 설계의 목적과 적용 범위(「소방시설의 내진설계 기준」)를 설명하시오.' },
+        { label: '(2)', text: '버팀대(Sway Brace)의 종류(4방향·2방향·1방향)와 설치 기준을 설명하시오.' },
+        { label: '(3)', text: '내진 스토퍼(Seismic Stopper), 플렉시블 조인트(Flexible Joint), 흔들림 방지 버팀대의 역할을 비교 설명하시오.' },
+      ],
+      answer: `【4】 소방시설 내진 설계
+
+(1) 내진 설계 목적 및 적용 범위
+
+▶ 목적
+ · 지진 발생 시 소방시설(배관·설비)의 파손 방지
+ · 지진 후에도 소화 기능 유지 → 화재 대응 능력 보전
+ · 2차 재해(누수, 가스 누출 등) 방지
+
+▶ 적용 범위 (소방시설의 내진설계 기준, 2022)
+ · 「소방시설법」에 따른 특정소방대상물 중
+   「건축물 내진설계 기준」 적용 대상 건축물의 소방시설
+ · 구체적 대상: 스프링클러설비, 옥내소화전설비, 포소화설비,
+   물분무소화설비, 가스계소화설비(CO₂, 할론 등), 비상콘센트설비 등
+
+▶ 설계 지진 기준
+ · 재현주기 500년: 평균 최대 지반가속도(PGA) 0.2g (서울 기준)
+ · 중요도 계수: 소방시설 = 1.5 (일반 1.0보다 높은 기준 적용)
+
+(2) 버팀대(Sway Brace) 종류 및 설치 기준
+
+▶ 흔들림 방지 버팀대 종류
+
+① 4방향 버팀대 (4-Way Sway Brace)
+ · 종방향·횡방향·수직방향 모두 지지
+ · 설치 간격: 배관 횡방향 최대 12 m마다 (직경 65 mm 이상)
+ · 주로 메인 배관에 설치
+
+② 2방향 버팀대 (2-Way Sway Brace)
+ · 횡방향 2방향만 지지
+ · 종방향 버팀대와 조합하여 4방향 효과 구현
+ · 설치 간격: 종방향 최대 24 m마다
+
+③ 1방향 버팀대 (1-Way Sway Brace)
+ · 단일 방향만 지지
+ · 분기 배관, 소구경 배관에 적용
+
+▶ 설치 기준
+ · 배관 직경 25 mm 이상: 내진 버팀대 적용
+ · 설치 재료: 강도 확인된 강관, 형강
+ · 지지점: 건물 구조체(슬래브, 보, 기둥)에 앵커 고정
+ · 앵커 인발 강도: 지진 하중의 1.4배 이상
+
+(3) 내진 스토퍼·플렉시블 조인트·버팀대 비교
+
+ 구분              │ 내진 스토퍼              │ 플렉시블 조인트          │ 흔들림 방지 버팀대
+ ──────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────
+ 역할              │ 기기 이동 제한           │ 변위·진동 흡수           │ 배관 흔들림 제어
+ 설치 위치         │ 펌프·수조 주위           │ 펌프 토출·흡입 직후      │ 배관 도중
+ 허용 변위         │ 거의 없음 (이동 방지)    │ 크게 허용                │ 설계 범위 내 제한
+ 하중 방향         │ 수평·수직 제한           │ 축방향·각도 변위 모두    │ 주로 횡방향
+ 기능 원리         │ 충격 흡수 완충재         │ 금속 벨로우즈 또는 고무  │ 사선 버팀재로 지지
+
+▶ 상호 보완 관계
+ · 플렉시블 조인트: 펌프 진동·지진 변위가 배관으로 전달되는 것을 차단
+ · 내진 스토퍼: 지진 시 기기 자체가 과도하게 이동하지 않도록 제한
+ · 흔들림 방지 버팀대: 배관이 수평·수직으로 흔들리지 않도록 고정
+ → 3가지를 조합 적용하여 내진 성능 확보`
+    },
+    {
+      number: 5, points: 25,
+      text: `<strong>위험물의 분류 및 저장·취급 기준</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '위험물안전관리법상 위험물의 분류(제1류~제6류)와 각 류의 성질·대표 품명을 설명하시오.' },
+        { label: '(2)', text: '지정수량의 개념과 지정수량 배수 계산 방법을 설명하시오.' },
+        { label: '(3)', text: '위험물 저장소의 종류(옥내·옥외·지하탱크·이동탱크)와 각각의 특징을 비교 설명하시오.' },
+      ],
+      answer: `【5】 위험물 분류 및 저장·취급 기준
+
+(1) 위험물 분류 (위험물안전관리법 [별표 1])
+
+① 제1류 (산화성 고체): 가연물과 혼합 시 연소·폭발 촉진
+ · 아염소산염류, 염소산염류, 과염소산염류, 질산염류, 과망간산염류
+ · 특성: 자체 산소 공급원 → 가연물 접촉 위험
+
+② 제2류 (가연성 고체): 점화 용이, 발화점 낮은 고체
+ · 황화린, 적린, 유황, 철분, 금속분, 마그네슘
+ · 특성: 저온 발화, 연소 시 유독 가스 발생 위험
+
+③ 제3류 (자연발화성·금수성 물질): 공기·물과 반응
+ · 칼륨, 나트륨, 알킬알루미늄, 황린, 알킬리튬
+ · 특성: 공기 접촉 → 자연발화 / 물 접촉 → 수소 발생·폭발
+
+④ 제4류 (인화성 액체): 가장 화재 위험 빈번
+ · 특수인화물, 제1~4석유류, 알코올류, 동·식물유류
+ · 특성: 인화점 낮음, 증기 비중 > 1 → 저지대 체류 위험
+
+⑤ 제5류 (자기반응성 물질): 내부 산소 포함, 자기 연소·폭발
+ · 유기과산화물, 니트로화합물, 니트로소화합물
+ · 특성: 외부 산소 없이도 연소·폭발 — 소화 어려움
+
+⑥ 제6류 (산화성 액체): 가연물 접촉 시 연소 촉진
+ · 과염소산, 과산화수소, 질산
+ · 특성: 자체는 불연성이나 강산화제 → 가연물과 혼합 위험
+
+(2) 지정수량 및 배수 계산
+
+▶ 지정수량 정의
+ · 위험물 종류별로 위험성을 고려하여 대통령령으로 정한 수량
+ · 지정수량 이상: 위험물안전관리법 전면 적용 (허가, 저장소 기준)
+ · 지정수량 미만: 시·도 조례 적용
+
+▶ 대표 지정수량
+ · 아세톤(제4류 제1석유류 수용성): 400 ℓ
+ · 가솔린(제4류 제1석유류 비수용성): 200 ℓ
+ · 에탄올(알코올류): 400 ℓ
+ · 등유(제2석유류 비수용성): 1,000 ℓ
+
+▶ 지정수량 배수 계산 (혼재 저장 시)
+ 배수 합계 = A의 저장량/A의 지정수량 + B의 저장량/B의 지정수량 + ···
+ 배수 합계 ≥ 1 → 위험물안전관리법 전면 적용
+
+(3) 위험물 저장소 종류 비교
+
+ 구분          │ 옥내저장소       │ 옥외저장소       │ 지하탱크저장소   │ 이동탱크저장소
+ ──────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────
+ 위치          │ 건축물 내부      │ 옥외 지상        │ 지하 매설 탱크   │ 차량 탱크
+ 형태          │ 창고형 건물      │ 야적 또는 탱크   │ 지하 탱크        │ 탱크로리
+ 환기          │ 강제 환기 필수   │ 자연 환기        │ 통기관 필수      │ 이동 중 자연
+ 적용 위험물   │ 제2·4·5류 등    │ 제2류(고체) 등   │ 제4류(액체)      │ 제4류 주로
+ 규모 제한     │ 1,000 m² 이하   │ 제한 없음         │ 용량 기준        │ 용량 30,000 ℓ 이하`
+    },
+    {
+      number: 6, points: 25,
+      text: `<strong>전기화재의 원인과 예방</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '전기화재의 주요 발생 원인(단락, 과부하, 누전, 접촉 불량, 정전기) 5가지를 설명하시오.' },
+        { label: '(2)', text: '누전차단기와 배선용차단기(MCCB)의 차이점 및 설치 기준을 설명하시오.' },
+        { label: '(3)', text: '정전기 발생 원인과 소방 시설·위험물 설비에서의 방전 방지 대책을 설명하시오.' },
+      ],
+      answer: `【6】 전기화재 원인 및 예방
+
+(1) 전기화재 주요 원인 5가지
+
+① 단락(Short Circuit, 합선)
+ · 전선 피복 손상으로 두 전선이 직접 접촉 → 대전류 순간 통전
+ · 발열량: P = I²R → 저항이 거의 없어 극대전류 → 불꽃·발화
+ · 방지: 절연 피복 보호, 배선용 차단기(MCCB) 설치
+
+② 과부하(Over Current)
+ · 전선 허용 전류 초과 통전 → 지속적 발열 → 절연체 탄화·발화
+ · 원인: 문어발 콘센트, 규격 미달 전선 사용
+ · 방지: 허용 전류에 맞는 배선 시공, 과전류 차단기 설치
+
+③ 누전(Leakage Current)
+ · 절연 불량으로 전류가 전선 외부로 흘러 대지 또는 외함에 통전
+ · 발열 or 아크 → 주변 가연물 발화
+ · 방지: 누전차단기(ELB), 절연 저항 정기 측정
+
+④ 접촉 불량(Poor Contact)
+ · 접속점의 접촉 저항 증가 → P = I²R에 의한 발열
+ · 원인: 산화, 진동에 의한 나사 풀림, 불완전 결선
+ · 방지: 정기 점검, 단자 조임 확인, 방진 조치
+
+⑤ 정전기 방전 (Static Discharge)
+ · 물체 간 마찰·유동으로 전하 축적 → 방전 시 스파크 발생
+ · 가연성 가스·증기 존재 시 점화원 역할
+ · 방지: 접지, 본딩, 대전방지 소재 사용
+
+(2) 누전차단기(ELB) vs 배선용차단기(MCCB) 비교
+
+▶ 누전차단기(ELB, Earth Leakage Breaker)
+ · 동작 원리: 영상변류기(ZCT)로 영상 전류(누설 전류) 검출 → 설정값 초과 시 차단
+ · 감도 전류: 고감도 15 mA, 30 mA / 중감도 100~500 mA
+ · 동작 시간: 0.1초 이내 (고속형)
+ · 목적: 누전에 의한 감전·화재 방지
+ · 설치 기준: 주거용·상업용 분기회로 (220V 접지 의무 건물)
+
+▶ 배선용차단기(MCCB, Molded Case Circuit Breaker)
+ · 동작 원리: 과전류·단락 전류 시 바이메탈(열동형) 또는 전자식 트립
+ · 목적: 과전류·단락에 의한 배선·기기 보호
+ · 누전 감지 불가 (누전차단기 기능 없음)
+
+▶ 설치 기준
+ · 분기 회로별 MCCB 설치 의무
+ · 누전차단기: 욕실·주방·야외 콘센트 등 감전 위험 장소
+
+(3) 정전기 방전 방지 대책
+
+▶ 발생 원인
+ · 두 물체 간 마찰, 분리, 박리 → 전하 분리 (접촉전위차)
+ · 유체 유동: 위험물(석유류) 배관 내 유동 → 정전기 축적
+
+▶ 위험물 설비에서의 방지 대책
+ · 접지(Grounding): 탱크, 배관, 주입구를 대지에 연결 → 전하 방산
+ · 본딩(Bonding): 두 도체 간 도선 연결 → 전위차 제거
+   (탱크 ↔ 주입 호스 ↔ 차량 → 동전위화)
+ · 유속 제한: 배관 내 액체 유속 1 m/s 이하 (주입 초기)
+ · 습도 유지: 상대습도 65% 이상 → 정전기 축적 억제
+ · 대전방지 소재: 도전성 호스, 도전성 발판 사용`
+    },
+    {
+      number: 7, points: 25,
+      text: `<strong>방폭설비(Explosion-Proof Equipment)</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '폭발 위험장소의 분류(Zone 0, 1, 2)와 분진 폭발 위험장소를 설명하시오.' },
+        { label: '(2)', text: '방폭 구조의 종류(내압·유입·압력·본질안전·몰드·충전)를 설명하시오.' },
+        { label: '(3)', text: '방폭 전기기기의 선정 기준과 설치 시 주의사항을 설명하시오.' },
+      ],
+      answer: `【7】 방폭설비
+
+(1) 폭발 위험장소 분류
+
+▶ 가스·증기 위험장소 (KS C IEC 60079-10-1)
+ · Zone 0: 폭발성 분위기가 상시 또는 장기간(1,000시간/년 초과) 존재
+   → 본질안전 방폭구조(ia) 적용 필수
+ · Zone 1: 정상 운전 중 폭발성 분위기가 가끔(10~1,000시간/년) 존재
+   → 내압·유입·압력·증가안전·본질안전 방폭구조 적용
+ · Zone 2: 이상 시에만 폭발성 분위기 형성(10시간/년 미만)
+   → Zone 1 적용 구조 + 증가안전·비점화형 방폭구조 적용 가능
+
+▶ 분진 폭발 위험장소 (KS C IEC 60079-10-2)
+ · Zone 20: 분진 폭발성 분위기 상시 또는 장기간 존재
+ · Zone 21: 정상 운전 중 가끔 분진 폭발성 분위기 형성
+ · Zone 22: 이상 시에만 분진 폭발성 분위기 형성
+
+(2) 방폭 구조 종류
+
+① 내압방폭구조 (Flameproof, d)
+ · 원리: 기기 내부 폭발이 외부 폭발성 분위기로 전파되지 않도록 견고한 외함
+ · 틈새 냉각으로 화염 전파 차단
+ · 적용: Zone 1, 2
+
+② 유입방폭구조 (Oil Immersion, o)
+ · 원리: 아크·불꽃이 발생하는 부분을 절연유에 침적
+ · 변압기, 스위치에 적용
+
+③ 압력방폭구조 (Pressurization, p)
+ · 원리: 외함 내부를 보호기체(공기, 불활성 가스)로 양압 유지
+ · 가스 침투 원천 차단
+ · 대형 기기, 제어반에 적용
+
+④ 본질안전방폭구조 (Intrinsic Safety, i)
+ · 원리: 정상 시와 고장 시 모두 점화 에너지 이하로 제한
+ · ia: Zone 0 적용 (2중 고장에도 안전), ib: Zone 1
+ · 계측·제어 기기에 주로 적용
+
+⑤ 몰드방폭구조 (Encapsulation, m)
+ · 원리: 점화원 부분을 수지(Epoxy 등)로 완전 밀봉
+ · 소형 기기, 센서에 적용
+
+⑥ 충전방폭구조 (Powder Filling, q)
+ · 원리: 외함 내부를 석영 모래 등 불연성 분말로 충전
+
+(3) 방폭 기기 선정 기준 및 주의사항
+
+▶ 선정 기준
+ · 위험장소 분류 → 적합한 방폭 구조 선택
+ · 가스 그룹(Gas Group): IIA(프로판류) → IIB(에틸렌류) → IIC(수소, 아세틸렌)
+   → IIC 기기는 IIA·IIB 가스 환경에도 사용 가능
+ · 온도등급(T1~T6): 기기 표면 최고온도 ≤ 가스 발화점
+   T6: 표면 최고 85℃ (이황화탄소 발화점 90℃ 대응)
+
+▶ 설치 시 주의사항
+ · 방폭 외함 케이블 인입: 방폭 케이블 글랜드(Gland) 사용 필수
+ · 미사용 케이블 인입구: 인증된 플러그로 밀폐
+ · 개방 점검 후 재조립: 볼트 전수 조임, 가스켓 교체 여부 확인
+ · IEC 인증 마킹 확인: Ex 마크 + 방폭 구조 기호 + 가스그룹 + 온도등급`
+    },
+    {
+      number: 8, points: 25,
+      text: `<strong>소방시설의 비상전원</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '비상전원의 종류(축전지설비, 비상발전기, 전기저장장치)와 각각의 특성을 비교 설명하시오.' },
+        { label: '(2)', text: '비상발전기의 용량 산정 방법과 기동 방식(자동기동·수동기동)을 설명하시오.' },
+        { label: '(3)', text: '소방시설별 비상전원 용량 기준(작동 시간)을 설명하시오.' },
+      ],
+      answer: `【8】 소방시설의 비상전원
+
+(1) 비상전원 종류 및 특성 비교
+
+① 축전지설비 (Battery System)
+ · 원리: 직류 전기를 화학 에너지로 저장 → 방전 시 직류 공급
+ · 종류: 연축전지(Pb), 알칼리 축전지(Ni-Cd), 리튬이온 배터리
+ · 특징: 즉시 전력 공급 (절체 시간 거의 없음), 유지보수 필요
+ · 적용: 자동화재탐지설비, 비상조명등, 유도등 등
+
+② 비상발전기 (Emergency Generator)
+ · 원리: 디젤 또는 가스 엔진 구동 → 교류 전력 발생
+ · 기동 시간: 정전 후 40초 이내 전력 공급 (대형 소방시설)
+ · 특징: 대용량 전력 공급 가능, 연료 소비, 기동 시간 존재
+ · 적용: 스프링클러, 제연설비, 소화펌프 등 대용량 설비
+
+③ 전기저장장치 (ESS: Energy Storage System)
+ · 원리: 리튬이온 등 대용량 배터리 + 전력변환장치(PCS)
+ · 특징: 즉시 전력 공급, 교류 출력 가능, 대용량화 용이
+ · 최근 비상발전기 대체 검토 (환경 규제 강화 추세)
+
+▶ 비교
+ 구분       │ 축전지설비    │ 비상발전기       │ ESS
+ ───────────┼───────────────┼──────────────────┼─────────────────
+ 절체 시간  │ 즉시           │ 40초 이내        │ 즉시
+ 용량       │ 소·중          │ 대용량           │ 대용량
+ 연료 필요  │ 불필요         │ 필요 (경유)      │ 불필요
+ 유지보수   │ 배터리 교체    │ 정기 시운전 필요 │ 배터리 관리
+
+(2) 비상발전기 용량 산정 및 기동 방식
+
+▶ 용량 산정
+ 발전기 출력[kVA] ≥ Σ(각 부하 정격 출력[kW]) / 역률(PF)
+ · 기동 돌입 전류 고려: 전동기 기동 시 정격의 5~7배 전류 → 최대 기동 부하로 산정
+ · 실무: 동시 기동 부하 중 최대값으로 산정 후 안전율 1.2~1.3 적용
+
+▶ 기동 방식
+ · 자동기동: 상용전원 정전 감지 → 자동으로 엔진 기동 → 40초 이내 전력 공급
+   기동 신호: 전압 감지형(UVR), 주파수 감지형
+ · 수동기동: 방재센터 또는 발전기실에서 수동 조작
+
+(3) 소방시설별 비상전원 용량 기준
+
+ 소방시설                 │ 비상전원 용량(작동 시간)
+ ────────────────────────┼─────────────────────────────────
+ 자동화재탐지설비         │ 10분 이상 (감시 상태 60분 + 경보 10분)
+ 스프링클러설비           │ 20분 이상
+ 포소화설비              │ 20분 이상
+ CO₂·할론·청정소화설비  │ 10분 이상
+ 옥내소화전설비           │ 20분 이상
+ 제연설비                 │ 20분 이상
+ 비상조명등               │ 20분 이상 (대형 건축물 60분)
+ 비상방송설비             │ 10분 이상
+ 유도등                   │ 20분 이상 (대형 건축물 60분)
+ 비상콘센트설비           │ 20분 이상`
+    },
+    {
+      number: 9, points: 25,
+      text: `<strong>소방시설의 유지관리 및 작동기능점검</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '소방시설 자체점검의 종류(작동기능점검·종합정밀점검)와 점검 주기, 대상을 설명하시오.' },
+        { label: '(2)', text: '스프링클러설비의 작동 시험 방법과 확인 항목을 설명하시오.' },
+        { label: '(3)', text: '소방시설 불량 유형(미작동·오작동·외관 불량)별 원인과 개선 방안을 설명하시오.' },
+      ],
+      answer: `【9】 소방시설 유지관리 및 점검
+
+(1) 자체점검 종류 및 주기
+
+▶ 작동기능점검
+ · 목적: 소방시설이 정상 작동하는지 기능 확인
+ · 주기: 연 1회 이상
+ · 대상: 소방안전관리 대상물 전체
+ · 점검자: 관계인, 소방안전관리자, 소방시설관리사
+
+▶ 종합정밀점검
+ · 목적: 소방시설의 구조·성능 전반에 대한 정밀 점검
+ · 주기: 연 1회 이상 (작동기능점검과 6개월 간격)
+ · 대상: 스프링클러 설치 대상물 (연면적 5,000 m² 이상), 다중이용업소 등
+ · 점검자: 소방시설관리업체 (소방시설관리사 필수)
+
+▶ 점검 결과 조치
+ · 점검 결과 기록·보관: 2년 이상
+ · 불량 항목 보수 조치 후 소방서 보고
+
+(2) 스프링클러설비 작동 시험
+
+▶ 말단 시험밸브(End Test Valve) 시험
+ · 방법: 각 방호구역 최말단 시험밸브 개방 → 유수검지장치 작동 여부 확인
+ · 확인 항목
+   ① 유수검지장치(알람밸브) 작동 및 압력스위치 신호 발생
+   ② 수신기 화재 표시 및 경보 출력 (싸이렌, 방송)
+   ③ 소화펌프 자동 기동 확인
+   ④ 기동용 수압개폐장치(압력챔버) 압력 확인
+   ⑤ 방수 시간 및 방수압 측정 (방수구 0.1 MPa 이상)
+
+▶ 펌프 성능 시험
+ · 체절 운전 시 압력: 정격양정의 140% 이하
+ · 정격 운전: 정격 유량, 정격 압력 확인
+ · 150% 과유량: 정격양정의 65% 이상
+
+(3) 소방시설 불량 유형별 원인 및 개선
+
+▶ 미작동 (작동해야 할 때 작동 안 함)
+ · 원인: 밸브 잠금(폐쇄), 전원 차단, 배터리 방전, 배관 동결
+ · 개선: OS&Y밸브 상시 개방 잠금 확인, 예비전원 정기 점검, 동결 방지
+
+▶ 오작동 (작동하면 안 될 때 작동)
+ · 원인: 감지기 먼지·습기 오염, 헤드 물리적 충격, 압력 설정 오류
+ · 개선: 감지기 정기 청소, 헤드 보호캡 설치, 압력스위치 설정값 재확인
+
+▶ 외관 불량
+ · 원인: 헤드 도장 피복, 배관 부식, 표지판 훼손
+ · 개선: 헤드 교체 (도장 금지), 방청 처리, 표지판 재설치
+ · 헤드 도장: 소화 성능 저하 (열 감지 방해) → 절대 금지`
+    },
+    {
+      number: 10, points: 25,
+      text: `<strong>피뢰설비 및 서지보호장치</strong>에 대하여 다음을 설명하시오.`,
+      subs: [
+        { label: '(1)', text: '낙뢰의 발생 원리와 건축물에 미치는 영향을 설명하시오.' },
+        { label: '(2)', text: '외부 피뢰 시스템(수뢰부·인하도선·접지)의 구성과 설치 기준을 설명하시오.' },
+        { label: '(3)', text: '내부 피뢰 시스템(등전위 본딩, SPD)의 원리와 소방 전기설비 보호 방법을 설명하시오.' },
+      ],
+      answer: `【10】 피뢰설비 및 서지보호장치
+
+(1) 낙뢰 발생 원리 및 건축물 영향
+
+▶ 낙뢰 발생 원리
+ · 구름-대지 간 전위차 축적 → 선구방전(Stepped Leader) 진행
+ · 지상 물체에서 상향 스트리머(Upward Streamer) 발생
+ · 두 방전이 연결 → 귀환뇌격(Return Stroke) 발생 — 1~200 kA 이상 전류
+
+▶ 건축물에 미치는 영향
+ · 직격뢰(Direct Stroke): 건물 직접 타격 → 구조 손상, 화재 발생
+ · 간접뢰(Indirect Stroke): 근처 낙뢰 → 전자기 유도 → 전기·통신 기기 파손
+ · 접지 전위 상승: 낙뢰 전류가 접지로 방류 → 주변 기기에 역유입 (Backflash)
+ · 소방 전기설비 피해: 수신기, 감지기, 배선 등 과전압 손상
+
+(2) 외부 피뢰 시스템 구성 및 기준
+
+▶ 구성 (KS C IEC 62305)
+
+① 수뢰부 (Air-termination System)
+ · 낙뢰를 포착하는 부분
+ · 종류: 피뢰침(돌침), 수평도체(메시 도체), 수뢰 격자
+ · 보호각법·회전구체법·메시법으로 보호 범위 계산
+
+② 인하도선 (Down Conductor)
+ · 수뢰부 → 접지로 낙뢰 전류 전달
+ · 재질: 구리·알루미늄·갈바나이즈드 스틸
+ · 설치 간격: 보호 레벨에 따라 10~25 m
+
+③ 접지 시스템 (Earthing System)
+ · 낙뢰 전류를 대지로 방류
+ · 접지저항: 10 Ω 이하 (소방 설비용)
+ · 등전위 접지망(Equipotential Earthing Grid) 구성
+
+(3) 내부 피뢰 시스템
+
+▶ 등전위 본딩 (Equipotential Bonding)
+ · 모든 도전성 부분을 동일 전위로 연결 → 전위차 제거
+ · 본딩 대상: 배관, 덕트, 강철 구조체, 외부 인입선
+ · 본딩 도체: 6 mm² 이상 구리선
+
+▶ 서지보호장치 (SPD: Surge Protective Device)
+ · 원리: 과전압 서지 발생 시 저임피던스 경로로 전류 우회 → 기기 보호
+ · 종류: 방전갭형(Spark Gap), 배리스터(MOV), 가스방전관(GDT)
+ · 설치 위치: 분전반 인입부(Class I·II), 기기 근처(Class III)
+ · 최대 작동 전압(Uc): 보호 기기 내전압 이하 선정
+
+▶ 소방 전기설비 보호 방법
+ · 수신기 전원 인입부: SPD 설치 (Class II 이상)
+ · 통신 선로(감지기 배선): 신호용 SPD (RS-485 라인 보호)
+ · 내뢰 등급 강화: 중요 설비는 IEC 62305 LPL I (최고 등급) 적용
+ · 케이블 경로: 피뢰 인하도선과 최소 1 m 이상 이격 배선`
+    }
+  ]
+];
+
+// ─────────────────────────────────────────────────
+//  타이머
+// ─────────────────────────────────────────────────
+const EXAM_MINUTES = 100;
+let totalSeconds = EXAM_MINUTES * 60;
+let timerInterval = null;
+let timerPaused  = false;
+let examStarted  = false;
+// 세트별 남은 시간 저장 (세트 수만큼)
+const setTimers = Array(4).fill(null).map(() => EXAM_MINUTES * 60);
+
+function startTimer() {
+  examStarted = true;
+  timerInterval = setInterval(() => {
+    if (timerPaused) return;
+    totalSeconds--;
+    if (totalSeconds <= 0) {
+      clearInterval(timerInterval);
+      submitExam(true);
+      return;
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const s = String(totalSeconds % 60).padStart(2, '0');
+  const el = document.getElementById('timer');
+  el.textContent = `${m}:${s}`;
+  if (totalSeconds <= 600) el.className = 'danger';
+  else if (totalSeconds <= 1800) el.className = 'warning';
+  else el.className = '';
+}
+
+function toggleTimer() {
+  timerPaused = !timerPaused;
+  document.querySelector('[onclick="toggleTimer()"]').textContent =
+    timerPaused ? '▶ 재개' : '⏸ 일시정지';
+}
+
+// ─────────────────────────────────────────────────
+//  문제 렌더링
+// ─────────────────────────────────────────────────
+let currentSet = 0;
+let answersShown = false;
+const QUESTIONS_PER_EXAM = 4; // 세트당 출제 문항 수
+
+function pickRandom(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+// 세트별 랜덤 뽑힌 문제 저장 (세트 전환 후 돌아와도 동일 문제 유지)
+const pickedQuestions = QUESTION_SETS.map(set => pickRandom(set, QUESTIONS_PER_EXAM));
+
+function loadSet(index, btn) {
+  // 현재 세트 타이머 저장
+  setTimers[currentSet] = totalSeconds;
+  currentSet = index;
+  answersShown = false;
+  // 버튼 활성화
+  document.querySelectorAll('.session-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 해당 세트의 남은 시간 복원 (처음이면 100분)
+  totalSeconds = setTimers[index];
+  updateTimerDisplay();
+  // 렌더링 (랜덤 뽑힌 문제 사용)
+  renderQuestions(pickedQuestions[index]);
+  updateProgress();
+}
+
+function renderQuestions(questions) {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = `<div class="section-title">문제 (각 25점)</div>`;
+
+  questions.forEach((q, i) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    block.id = `q-block-${i}`;
+
+    let subsHtml = '';
+    if (q.subs && q.subs.length) {
+      subsHtml = `<ul class="sub-questions">` +
+        q.subs.map(s => `<li data-label="${s.label}">${s.text}</li>`).join('') +
+        `</ul>`;
+    }
+
+    block.innerHTML = `
+      <div class="q-header">
+        <div style="display:flex;align-items:flex-start;flex:1;">
+          <span class="q-number">${q.number}</span>
+          <div class="q-text">${q.text}${subsHtml}</div>
+        </div>
+        <span class="q-points">${q.points}점</span>
+      </div>
+      <div class="answer-box">
+        <label>▷ 답안 작성란</label>
+        <textarea id="ans-${i}" placeholder="여기에 답안을 작성하세요." oninput="onAnswerInput(${i})"></textarea>
+        <div class="char-count" id="char-${i}">0자</div>
+      </div>
+      <div class="model-answer" id="ma-${i}">
+        <div class="ma-title">【 모범 답안 】</div>
+        <div class="ma-content">${q.answer}</div>
+      </div>
+      ${i < questions.length - 1 ? '<hr class="divider">' : ''}
+    `;
+    container.appendChild(block);
+  });
+
+  document.getElementById('total-count').textContent = questions.length;
+
+  // 타이머 시작 (항상 기존 인터벌 제거 후 새로 시작)
+  clearInterval(timerInterval);
+  examStarted = false;
+  startTimer();
+}
+
+function onAnswerInput(idx) {
+  const ta = document.getElementById(`ans-${idx}`);
+  document.getElementById(`char-${idx}`).textContent = ta.value.length + '자';
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = QUESTION_SETS[currentSet].length;
+  let count = 0;
+  for (let i = 0; i < total; i++) {
+    const ta = document.getElementById(`ans-${i}`);
+    if (ta && ta.value.trim().length > 10) count++;
+  }
+  document.getElementById('answered-count').textContent = count;
+}
+
+// ─────────────────────────────────────────────────
+//  모범 답안 토글
+// ─────────────────────────────────────────────────
+function toggleAnswers() {
+  answersShown = !answersShown;
+  const total = QUESTION_SETS[currentSet].length;
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById(`ma-${i}`);
+    if (el) el.classList.toggle('show', answersShown);
+  }
+}
+
+function showAnswers() {
+  closeResult();
+  answersShown = true;
+  const total = QUESTION_SETS[currentSet].length;
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById(`ma-${i}`);
+    if (el) el.classList.add('show');
+  }
+  setTimeout(() => {
+    document.getElementById('q-block-0')?.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+// ─────────────────────────────────────────────────
+//  시험 제출
+// ─────────────────────────────────────────────────
+function submitExam(autoSubmit = false) {
+  clearInterval(timerInterval);
+  const elapsed = EXAM_MINUTES * 60 - totalSeconds;
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  document.getElementById('result-time').textContent = `${m}분 ${s}초`;
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('result-overlay').classList.remove('show');
+}
+
+// ─────────────────────────────────────────────────
+//  초기화
+// ─────────────────────────────────────────────────
+document.getElementById('exam-date').value =
+  new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+renderQuestions(pickedQuestions[0]);
+</script>
+</body>
+</html>

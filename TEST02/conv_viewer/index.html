@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude 대화 세션 관리자</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0d14; color: #e0e0e0;
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* ── 헤더 ── */
+    header {
+      background: #12121f; border-bottom: 1px solid #1e1e30;
+      padding: 0 20px; height: 52px;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .logo { width: 8px; height: 8px; border-radius: 50%; background: #6366f1; flex-shrink: 0; }
+    header h1 { font-size: 0.95rem; font-weight: 600; color: #b0b0c8; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .api-key-wrap { display: flex; align-items: center; gap: 6px; }
+    .api-key-wrap label { font-size: 0.72rem; color: #444; }
+    .api-key-wrap input {
+      width: 220px; background: #0d0d1a; border: 1px solid #2a2a40;
+      border-radius: 6px; padding: 5px 10px; color: #c0c0d0;
+      font-size: 0.75rem; font-family: 'Consolas', monospace; outline: none;
+    }
+    .api-key-wrap input:focus { border-color: #4a4a70; }
+    #connDot {
+      width: 7px; height: 7px; border-radius: 50%; background: #333;
+      transition: background 0.3s;
+    }
+    #connDot.ok { background: #22c55e; }
+    #connDot.err { background: #ef4444; }
+
+    /* ── 레이아웃 ── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── 사이드바 ── */
+    .sidebar {
+      width: 280px; flex-shrink: 0;
+      background: #0f0f1c; border-right: 1px solid #1e1e30;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sidebar-top {
+      padding: 10px 12px; border-bottom: 1px solid #1a1a28; flex-shrink: 0;
+    }
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%; background: #0d0d1a; border: 1px solid #222238;
+      border-radius: 7px; padding: 7px 28px 7px 10px;
+      color: #c0c0d0; font-size: 0.78rem; font-family: inherit; outline: none;
+    }
+    .search-wrap input:focus { border-color: #3a3a60; }
+    .search-wrap input::placeholder { color: #2a2a40; }
+    .search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #3a3a5a; cursor: pointer;
+      font-size: 0.7rem; display: none;
+    }
+    .search-clear.show { display: block; }
+    .sidebar-info {
+      padding: 6px 12px; font-size: 0.65rem; color: #2a2a40;
+      border-bottom: 1px solid #1a1a28; flex-shrink: 0;
+    }
+    .session-list { overflow-y: auto; flex: 1; }
+    .session-list::-webkit-scrollbar { width: 3px; }
+    .session-list::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 4px; }
+
+    .session-item {
+      padding: 11px 14px; border-bottom: 1px solid #111120;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .session-item:hover { background: #14142a; }
+    .session-item.active { background: #1a1a38; border-left: 3px solid #6366f1; padding-left: 11px; }
+    .si-slug {
+      font-size: 0.78rem; font-weight: 600; color: #9090b8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+    }
+    .si-preview {
+      font-size: 0.7rem; color: #383848;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+    }
+    .si-meta { font-size: 0.63rem; color: #2a2a3a; display: flex; gap: 8px; }
+    .hi { color: #ffd43b !important; font-weight: 700; }
+
+    /* ── 메인 ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .chat-header {
+      padding: 10px 20px; border-bottom: 1px solid #1e1e30;
+      background: #0f0f1c; flex-shrink: 0; display: none;
+      align-items: center; gap: 10px;
+    }
+    .chat-header.show { display: flex; }
+    .ch-info { flex: 1; min-width: 0; }
+    .ch-title { font-size: 0.88rem; font-weight: 600; color: #9090b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ch-meta { font-size: 0.68rem; color: #2a2a40; margin-top: 1px; }
+    .ch-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .act-btn {
+      padding: 5px 13px; border-radius: 7px; font-size: 0.75rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; font-family: inherit; border: 1px solid;
+    }
+    .btn-summary { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); color: #8888d0; }
+    .btn-summary:hover { background: rgba(99,102,241,0.2); color: #aaaaf0; }
+    .btn-export { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); color: #4a9a6a; }
+    .btn-export:hover { background: rgba(34,197,94,0.18); color: #6abf8a; }
+
+    /* 내보내기 드롭다운 */
+    .export-wrap { position: relative; }
+    .export-menu {
+      display: none; position: absolute; right: 0; top: calc(100% + 4px);
+      background: #1a1a2e; border: 1px solid #2a2a45; border-radius: 8px;
+      overflow: hidden; z-index: 50; min-width: 120px;
+    }
+    .export-menu.show { display: block; }
+    .export-menu a {
+      display: block; padding: 8px 14px; font-size: 0.78rem; color: #8888b0;
+      text-decoration: none; transition: background 0.12s;
+    }
+    .export-menu a:hover { background: #2a2a40; color: #c0c0e0; }
+
+    /* 요약 패널 */
+    .summary-panel {
+      display: none; background: #0f0f20; border-bottom: 1px solid #1e1e35;
+      padding: 14px 20px; flex-shrink: 0;
+    }
+    .summary-panel.show { display: block; }
+    .sp-head { font-size: 0.7rem; color: #4a4a70; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .sp-close { background: none; border: none; color: #3a3a55; cursor: pointer; font-size: 0.8rem; }
+    .sp-close:hover { color: #8080a0; }
+    .sp-text { font-size: 0.82rem; line-height: 1.7; color: #9090b0; }
+
+    /* 대화 영역 */
+    .chat-body {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .chat-body::-webkit-scrollbar { width: 5px; }
+    .chat-body::-webkit-scrollbar-thumb { background: #1e1e30; border-radius: 4px; }
+
+    .empty-state {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 10px; color: #1e1e30;
+    }
+    .empty-state .ei { font-size: 2.5rem; }
+    .empty-state p { font-size: 0.8rem; }
+
+    /* 메시지 */
+    .msg { display: flex; gap: 10px; max-width: 820px; width: 100%; }
+    .msg.user { flex-direction: row-reverse; align-self: flex-end; }
+
+    .av {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    }
+    .msg.user .av { background: #4a4a8a; color: #c0c0f0; }
+    .msg.assistant .av { background: #162030; color: #6090b0; border: 1px solid #243040; }
+
+    .bw { display: flex; flex-direction: column; max-width: calc(100% - 40px); }
+    .msg.user .bw { align-items: flex-end; }
+
+    .bubble {
+      padding: 9px 13px; border-radius: 11px;
+      font-size: 0.82rem; line-height: 1.65; word-break: break-word; white-space: pre-wrap;
+    }
+    .msg.user .bubble { background: #18183a; border: 1px solid #262650; color: #c0c0e0; border-top-right-radius: 3px; }
+    .msg.assistant .bubble { background: #111120; border: 1px solid #1a1a2c; color: #ccccdc; border-top-left-radius: 3px; }
+
+    .mt { font-size: 0.6rem; color: #1e1e2e; margin-top: 3px; }
+
+    .bubble code {
+      background: #181828; border: 1px solid #282840; border-radius: 3px;
+      padding: 1px 5px; font-family: 'Consolas', monospace; font-size: 0.77rem; color: #6090c0;
+    }
+    .bubble pre {
+      background: #0c0c18; border: 1px solid #1a1a2c; border-radius: 7px;
+      padding: 11px; overflow-x: auto; margin: 7px 0;
+    }
+    .bubble pre code { background: none; border: none; padding: 0; color: #b0c0e0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <h1>Claude 대화 세션 관리자</h1>
+  <div class="header-right">
+    <div class="api-key-wrap">
+      <label>API Key (요약용)</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    </div>
+    <div id="connDot" title="서버 연결 상태"></div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 사이드바 -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="세션 검색..." oninput="onSearch(this.value)">
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      </div>
+    </div>
+    <div class="sidebar-info" id="sidebarInfo">불러오는 중...</div>
+    <div class="session-list" id="sessionList"></div>
+  </aside>
+
+  <!-- 메인 -->
+  <main class="main">
+    <div class="chat-header" id="chatHeader">
+      <div class="ch-info">
+        <div class="ch-title" id="chTitle"></div>
+        <div class="ch-meta" id="chMeta"></div>
+      </div>
+      <div class="ch-actions">
+        <button class="act-btn btn-summary" onclick="requestSummary()">✦ 요약</button>
+        <div class="export-wrap">
+          <button class="act-btn btn-export" onclick="toggleExportMenu()">↓ 내보내기</button>
+          <div class="export-menu" id="exportMenu">
+            <a href="#" onclick="exportSession('md')">Markdown (.md)</a>
+            <a href="#" onclick="exportSession('txt')">텍스트 (.txt)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-panel" id="summaryPanel">
+      <div class="sp-head">
+        <span>✦ AI 요약</span>
+        <button class="sp-close" onclick="closeSummary()">✕</button>
+      </div>
+      <div class="sp-text" id="summaryText"></div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="empty-state">
+        <div class="ei">💬</div>
+        <p>왼쪽에서 세션을 선택하세요</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = '';  // 같은 서버
+let sessions = [];
+let currentId = null;
+let searchQuery = '';
+
+// ── 초기화 ──
+async function init() {
+  await checkConn();
+  await loadSessions();
+}
+
+async function checkConn() {
+  try {
+    await fetch('/api/sessions');
+    document.getElementById('connDot').className = 'ok';
+  } catch {
+    document.getElementById('connDot').className = 'err';
+  }
+}
+
+// ── 세션 목록 ──
+async function loadSessions() {
+  try {
+    const r = await fetch('/api/sessions');
+    sessions = await r.json();
+    renderList();
+  } catch {
+    document.getElementById('sidebarInfo').textContent = '서버 연결 실패';
+  }
+}
+
+function renderList() {
+  const q = searchQuery.toLowerCase().trim();
+  const filtered = q
+    ? sessions.filter(s =>
+        s.slug.toLowerCase().includes(q) ||
+        s.firstMessage.toLowerCase().includes(q))
+    : sessions;
+
+  document.getElementById('sidebarInfo').textContent =
+    q ? `${filtered.length} / ${sessions.length}개 세션` : `${sessions.length}개 세션`;
+
+  const el = document.getElementById('sessionList');
+  if (!filtered.length) {
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:#2a2a40;font-size:0.78rem">${q ? '검색 결과 없음' : '세션 없음'}</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(s => `
+    <div class="session-item${s.id === currentId ? ' active' : ''}" onclick="selectSession('${s.id}', this)">
+      <div class="si-slug">${q ? hi(s.slug, q) : esc(s.slug)}</div>
+      <div class="si-preview">${q ? hi(s.firstMessage, q) : esc(s.firstMessage)}</div>
+      <div class="si-meta">
+        <span>${fmtDate(s.timestamp)}</span>
+        <span>💬 ${s.messageCount}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function onSearch(v) {
+  searchQuery = v;
+  document.getElementById('searchClear').className = v ? 'search-clear show' : 'search-clear';
+  renderList();
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  onSearch('');
+}
+
+// ── 세션 선택 ──
+async function selectSession(id, el) {
+  currentId = id;
+  document.querySelectorAll('.session-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  closeSummary();
+
+  const body = document.getElementById('chatBody');
+  body.innerHTML = '<div class="empty-state"><p>불러오는 중...</p></div>';
+
+  try {
+    const r = await fetch(`/api/sessions/${id}`);
+    const session = await r.json();
+    renderChat(session);
+  } catch {
+    body.innerHTML = '<div class="empty-state"><p>불러오기 실패</p></div>';
+  }
+}
+
+function renderChat(s) {
+  const header = document.getElementById('chatHeader');
+  header.className = 'chat-header show';
+  document.getElementById('chTitle').textContent = s.slug || s.id;
+  document.getElementById('chMeta').textContent =
+    `${fmtDateTime(s.firstTs)}  ·  메시지 ${s.messages.length}개  ·  ${s.cwd || ''}`;
+
+  const q = searchQuery.toLowerCase().trim();
+  const body = document.getElementById('chatBody');
+  body.innerHTML = s.messages.map(m => `
+    <div class="msg ${m.role}">
+      <div class="av">${m.role === 'user' ? 'U' : 'AI'}</div>
+      <div class="bw">
+        <div class="bubble">${renderMd(m.text, q)}</div>
+        <div class="mt">${fmtDateTime(m.timestamp)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  const first = body.querySelector('.hi');
+  if (first) first.scrollIntoView({ block: 'center' });
+  else body.scrollTop = body.scrollHeight;
+}
+
+// ── 요약 ──
+async function requestSummary() {
+  if (!currentId) return;
+  const apiKey = document.getElementById('apiKeyInput').value.trim()
+    || localStorage.getItem('convApiKey') || '';
+
+  if (!apiKey) {
+    alert('헤더의 API Key 입력란에 Anthropic API 키를 입력하세요.');
+    return;
+  }
+  localStorage.setItem('convApiKey', apiKey);
+
+  const panel = document.getElementById('summaryPanel');
+  const text = document.getElementById('summaryText');
+  panel.className = 'summary-panel show';
+  text.textContent = '요약 생성 중...';
+
+  try {
+    const r = await fetch(`/api/sessions/${currentId}/summary`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey })
+    });
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let result = '';
+    text.textContent = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      dec.decode(value).split('\n').forEach(line => {
+        if (!line.startsWith('data: ')) return;
+        const d = line.slice(6);
+        if (d === '[DONE]') return;
+        try {
+          const { text: t, error } = JSON.parse(d);
+          if (error) { result = '오류: ' + error; text.textContent = result; }
+          else if (t) { result += t; text.textContent = result; }
+        } catch {}
+      });
+    }
+  } catch (err) {
+    text.textContent = '요약 실패: ' + err.message;
+  }
+}
+
+function closeSummary() {
+  document.getElementById('summaryPanel').className = 'summary-panel';
+}
+
+// ── 내보내기 ──
+function toggleExportMenu() {
+  const m = document.getElementById('exportMenu');
+  m.classList.toggle('show');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.export-wrap')) {
+    document.getElementById('exportMenu').classList.remove('show');
+  }
+});
+
+function exportSession(fmt) {
+  if (!currentId) return;
+  document.getElementById('exportMenu').classList.remove('show');
+  window.location.href = `/api/sessions/${currentId}/export?format=${fmt}`;
+}
+
+// ── 마크다운 렌더 ──
+function renderMd(text, q) {
+  let h = esc(text);
+  h = h.replace(/```[\w]*\n([\s\S]*?)```/g, (_, c) => `<pre><code>${c.trimEnd()}</code></pre>`);
+  h = h.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  if (q) h = hiHtml(h, q);
+  return h;
+}
+
+// ── 유틸 ──
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hi(text, q) {
+  return esc(text).replace(new RegExp(`(${escRe(q)})`, 'gi'), '<span class="hi">$1</span>');
+}
+function hiHtml(html, q) {
+  return html.replace(/(<[^>]+>)|([^<]+)/g, (m, tag, text) =>
+    tag ? tag : text.replace(new RegExp(`(${escRe(esc(q))})`, 'gi'), '<span class="hi">$1</span>')
+  );
+}
+function escRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function fmtDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+}
+function fmtDateTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${fmtDate(ts)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// API 키 복원
+const saved = localStorage.getItem('convApiKey');
+if (saved) document.getElementById('apiKeyInput').value = saved;
+
+init();
+</script>
+</body>
+</html>

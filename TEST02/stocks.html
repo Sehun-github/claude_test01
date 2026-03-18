@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실시간 주식</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d14;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    header .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* API Key Banner */
+    #api-banner {
+      background: #1a1a2e;
+      border: 1px solid #f59e0b44;
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 32px;
+      max-width: 700px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #api-banner span { color: #f59e0b; font-size: 1.2rem; }
+
+    #api-banner .banner-text { flex: 1; }
+    #api-banner .banner-text p { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; }
+
+    #api-banner input {
+      width: 100%;
+      background: #0d0d14;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      font-family: 'Courier New', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #api-banner input:focus { border-color: #6366f1; }
+
+    #api-banner button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    #api-banner button:hover { background: #4f46e5; }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    @media (max-width: 680px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #12121f;
+      border: 1px solid #1e1e30;
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.3s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      border-color: #2a2a45;
+      transform: translateY(-2px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent, #6366f1);
+      opacity: 0.6;
+    }
+
+    .card[data-symbol="NVDA"] { --accent: #76b900; }
+    .card[data-symbol="AAPL"] { --accent: #a8a8b3; }
+    .card[data-symbol="TSLA"] { --accent: #e82127; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .ticker {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .company {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: #1e1e30;
+      color: var(--accent, #6366f1);
+      letter-spacing: 0;
+    }
+
+    .price {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      transition: color 0.4s;
+    }
+
+    .change {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .change.up   { background: #22c55e18; color: #22c55e; }
+    .change.down { background: #ef444418; color: #ef4444; }
+    .change.flat { background: #88888818; color: #888; }
+
+    .meta {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .meta-item label {
+      display: block;
+      font-size: 0.7rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+
+    .meta-item span {
+      font-size: 0.9rem;
+      color: #999;
+    }
+
+    /* Canvas mini chart */
+    canvas.sparkline {
+      width: 100%;
+      height: 50px;
+      margin-top: 16px;
+      border-radius: 4px;
+    }
+
+    /* Flash animation on price update */
+    @keyframes flashUp   { 0%,100%{background:transparent} 30%{background:#22c55e18} }
+    @keyframes flashDown { 0%,100%{background:transparent} 30%{background:#ef444418} }
+
+    .flash-up   { animation: flashUp   0.6s ease; }
+    .flash-down { animation: flashDown 0.6s ease; }
+
+    /* Status bar */
+    #status {
+      margin-top: 32px;
+      font-size: 0.75rem;
+      color: #333;
+    }
+
+    .loading-text {
+      color: #444;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span class="dot"></span>Real-Time Stock</h1>
+</header>
+
+<!-- API Key 입력 배너 -->
+<div id="api-banner">
+  <span>🔑</span>
+  <div class="banner-text">
+    <p>Finnhub 무료 API 키가 필요합니다 → <strong>finnhub.io</strong> 에서 발급</p>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="api-key-input" placeholder="API 키를 입력하세요 (예: d1abc23def456...)">
+      <button onclick="applyKey()">연결</button>
+    </div>
+  </div>
+</div>
+
+<!-- 주식 카드 3개 -->
+<div class="cards">
+
+  <div class="card" data-symbol="NVDA">
+    <div class="card-header">
+      <div>
+        <div class="ticker">NVDA</div>
+        <div class="company">NVIDIA Corporation</div>
+      </div>
+      <div class="logo">NV</div>
+    </div>
+    <div class="price" id="price-NVDA">—</div>
+    <div class="change flat" id="change-NVDA">— —%</div>
+    <div class="meta">
+      <div class="meta-item"><label>Open</label><span id="open-NVDA">—</span></div>
+      <div class="meta-item"><label>Prev Close</label><span id="pc-NVDA">—</span></div>
+      <div class="meta-item"><label>High</label><span id="high-NVDA">—</span></div>
+      <div class="meta-item"><label>Low</label><span id="low-NVDA">—</span></div>
+    </div>
+    <canvas class="sparkline" id="spark-NVDA"></canvas>
+  </div>
+
+  <div class="card" data-symbol="AAPL">
+    <div class="card-header">
+      <div>
+        <div class="ticker">AAPL</div>
+        <div class="company">Apple Inc.</div>
+      </div>
+      <div class="logo">AP</div>
+    </div>
+    <div class="price" id="price-AAPL">—</div>
+    <div class="change flat" id="change-AAPL">— —%</div>
+    <div class="meta">
+      <div class="meta-item"><label>Open</label><span id="open-AAPL">—</span></div>
+      <div class="meta-item"><label>Prev Close</label><span id="pc-AAPL">—</span></div>
+      <div class="meta-item"><label>High</label><span id="high-AAPL">—</span></div>
+      <div class="meta-item"><label>Low</label><span id="low-AAPL">—</span></div>
+    </div>
+    <canvas class="sparkline" id="spark-AAPL"></canvas>
+  </div>
+
+  <div class="card" data-symbol="TSLA">
+    <div class="card-header">
+      <div>
+        <div class="ticker">TSLA</div>
+        <div class="company">Tesla, Inc.</div>
+      </div>
+      <div class="logo">TS</div>
+    </div>
+    <div class="price" id="price-TSLA">—</div>
+    <div class="change flat" id="change-TSLA">— —%</div>
+    <div class="meta">
+      <div class="meta-item"><label>Open</label><span id="open-TSLA">—</span></div>
+      <div class="meta-item"><label>Prev Close</label><span id="pc-TSLA">—</span></div>
+      <div class="meta-item"><label>High</label><span id="high-TSLA">—</span></div>
+      <div class="meta-item"><label>Low</label><span id="low-TSLA">—</span></div>
+    </div>
+    <canvas class="sparkline" id="spark-TSLA"></canvas>
+  </div>
+
+</div>
+
+<div id="status">API 키를 입력하면 연결됩니다</div>
+
+<script>
+  const SYMBOLS = ['NVDA', 'AAPL', 'TSLA'];
+  const COLORS  = { NVDA: '#76b900', AAPL: '#a8a8b3', TSLA: '#e82127' };
+
+  // 각 종목의 최근 가격 히스토리 (스파크라인용)
+  const history = { NVDA: [], AAPL: [], TSLA: [] };
+  const MAX_HISTORY = 60;
+
+  let socket = null;
+  let apiKey = localStorage.getItem('finnhub_key') || '';
+
+  // 저장된 키 복원
+  if (apiKey) {
+    document.getElementById('api-key-input').value = apiKey;
+  }
+
+  function applyKey() {
+    const val = document.getElementById('api-key-input').value.trim();
+    if (!val) return;
+    apiKey = val;
+    localStorage.setItem('finnhub_key', apiKey);
+    init();
+  }
+
+  // Enter 키로도 연결
+  document.getElementById('api-key-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') applyKey();
+  });
+
+  // ── REST API로 초기 시세 조회 ──────────────────────────────────
+  async function fetchQuote(symbol) {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.c) updateCard(symbol, data.c, data.d, data.dp, data);
+  }
+
+  // ── 카드 UI 업데이트 ─────────────────────────────────────────
+  function updateCard(symbol, price, change, changePct, meta = null) {
+    const priceEl  = document.getElementById(`price-${symbol}`);
+    const changeEl = document.getElementById(`change-${symbol}`);
+    const card     = document.querySelector(`.card[data-symbol="${symbol}"]`);
+
+    const prev = parseFloat(priceEl.dataset.prev || price);
+    priceEl.dataset.prev = price;
+
+    // 플래시 효과
+    card.classList.remove('flash-up', 'flash-down');
+    if (price > prev) {
+      card.classList.add('flash-up');
+      priceEl.style.color = '#22c55e';
+    } else if (price < prev) {
+      card.classList.add('flash-down');
+      priceEl.style.color = '#ef4444';
+    } else {
+      priceEl.style.color = '';
+    }
+    setTimeout(() => { priceEl.style.color = ''; }, 800);
+
+    priceEl.textContent = `$${price.toFixed(2)}`;
+
+    // 등락
+    if (change !== null && changePct !== null) {
+      const sign = change >= 0 ? '+' : '';
+      const arrow = change >= 0 ? '▲' : '▼';
+      changeEl.textContent = `${arrow} ${sign}${change.toFixed(2)}  (${sign}${changePct.toFixed(2)}%)`;
+      changeEl.className = `change ${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}`;
+    }
+
+    // 메타
+    if (meta) {
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val) el.textContent = `$${val.toFixed(2)}`;
+      };
+      set(`open-${symbol}`, meta.o);
+      set(`pc-${symbol}`,   meta.pc);
+      set(`high-${symbol}`, meta.h);
+      set(`low-${symbol}`,  meta.l);
+    }
+
+    // 히스토리 & 스파크라인
+    history[symbol].push(price);
+    if (history[symbol].length > MAX_HISTORY) history[symbol].shift();
+    drawSparkline(symbol);
+  }
+
+  // ── 스파크라인 캔버스 ────────────────────────────────────────
+  function drawSparkline(symbol) {
+    const canvas = document.getElementById(`spark-${symbol}`);
+    if (!canvas) return;
+    const data = history[symbol];
+    if (data.length < 2) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth * dpr;
+    const H = 50 * dpr;
+    canvas.width  = W;
+    canvas.height = H;
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+
+    const pad = 4 * dpr;
+    const color = COLORS[symbol];
+
+    // 그라디언트 fill
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, color + '44');
+    grad.addColorStop(1, color + '00');
+
+    ctx.beginPath();
+    data.forEach((v, i) => {
+      const x = pad + (i / (data.length - 1)) * (W - pad * 2);
+      const y = H - pad - ((v - min) / range) * (H - pad * 2);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+
+    // fill
+    const lastX = pad + (W - pad * 2);
+    ctx.lineTo(lastX, H);
+    ctx.lineTo(pad, H);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // line
+    ctx.beginPath();
+    data.forEach((v, i) => {
+      const x = pad + (i / (data.length - 1)) * (W - pad * 2);
+      const y = H - pad - ((v - min) / range) * (H - pad * 2);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  // ── WebSocket 연결 ────────────────────────────────────────────
+  function connectWS() {
+    if (socket) socket.close();
+
+    socket = new WebSocket(`wss://ws.finnhub.io?token=${apiKey}`);
+
+    socket.addEventListener('open', () => {
+      SYMBOLS.forEach(s => {
+        socket.send(JSON.stringify({ type: 'subscribe', symbol: s }));
+      });
+      document.getElementById('status').textContent = '● 실시간 연결됨';
+      document.getElementById('status').style.color = '#22c55e55';
+    });
+
+    socket.addEventListener('message', e => {
+      const msg = JSON.parse(e.data);
+      if (msg.type !== 'trade' || !msg.data) return;
+      msg.data.forEach(trade => {
+        const symbol = trade.s;
+        if (!SYMBOLS.includes(symbol)) return;
+        const price = trade.p;
+        const prevPrice = parseFloat(
+          document.getElementById(`price-${symbol}`)?.dataset.prev || price
+        );
+        const pc = parseFloat(
+          document.getElementById(`pc-${symbol}`)?.textContent?.replace('$','') || price
+        );
+        const change = price - pc;
+        const changePct = pc ? (change / pc) * 100 : 0;
+        updateCard(symbol, price, change, changePct);
+      });
+    });
+
+    socket.addEventListener('close', () => {
+      document.getElementById('status').textContent = '연결 끊김 — 5초 후 재연결...';
+      document.getElementById('status').style.color = '#ef444455';
+      setTimeout(connectWS, 5000);
+    });
+
+    socket.addEventListener('error', () => {
+      document.getElementById('status').textContent = 'API 키를 확인하세요';
+      document.getElementById('status').style.color = '#f59e0b88';
+    });
+  }
+
+  // ── 초기화 ────────────────────────────────────────────────────
+  async function init() {
+    document.getElementById('status').textContent = '연결 중...';
+    // REST로 현재가 먼저 가져오기
+    await Promise.all(SYMBOLS.map(fetchQuote));
+    // WebSocket으로 실시간 연결
+    connectWS();
+    // 장 마감 시간대에도 1분마다 REST 폴링
+    setInterval(() => SYMBOLS.forEach(fetchQuote), 60000);
+  }
+
+  // 저장된 키 있으면 자동 연결
+  if (apiKey) init();
+</script>
+</body>
+</html>
