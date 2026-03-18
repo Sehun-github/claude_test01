@@ -13,6 +13,8 @@ export interface Issue {
   project_id: string | null;
   assignee: string | null;
   labels: string[];
+  due_date?: string;           // YYYY-MM-DD, 캘린더 연동용
+  calendar_event_id?: string;  // 연동된 캘린더 이벤트 ID
   created_at: string;
   updated_at: string;
 }

@@ -636,6 +636,24 @@ body {
 }
 .detail-desc:empty::before { content: attr(data-placeholder); color: var(--text3); }
 
+/* ── 캘린더 연동 배지 ── */
+.calendar-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #4A90D9;
+  background: rgba(74,144,217,0.12);
+  border: 1px solid rgba(74,144,217,0.3);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.calendar-sync-badge:hover { background: rgba(74,144,217,0.2); }
+.calendar-sync-badge.hidden { display: none; }
+
 /* ── 빈 상태 ── */
 .empty-state {
   display: flex;

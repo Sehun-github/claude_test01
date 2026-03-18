@@ -244,8 +244,6 @@ function openDetail(issue) {
 }
 
 function updateDetailPanel(issue) {
-  const project = projects.find(p => p.id === issue.project_id);
-
   document.getElementById('detail-identifier').textContent = issue.identifier;
   document.getElementById('detail-title').textContent = issue.title;
   document.getElementById('detail-desc').textContent = issue.description;
@@ -254,6 +252,16 @@ function updateDetailPanel(issue) {
   populateSelect('detail-priority', Object.entries(PRIORITY).map(([v, p]) => ({ value: v, label: p.icon + ' ' + p.label })), String(issue.priority));
   populateSelect('detail-assignee', [{ value: '', label: '담당자 없음' }, ...members.map(m => ({ value: m.id, label: m.avatar + ' ' + m.name }))], issue.assignee || '');
   populateSelect('detail-project', [{ value: '', label: '프로젝트 없음' }, ...projects.map(p => ({ value: p.id, label: p.name }))], issue.project_id || '');
+
+  document.getElementById('detail-due-date').value = issue.due_date || '';
+
+  const badge = document.getElementById('calendar-sync-badge');
+  if (issue.calendar_event_id) {
+    badge.classList.remove('hidden');
+    badge.title = '캘린더에서 이벤트 확인';
+  } else {
+    badge.classList.add('hidden');
+  }
 }
 
 function closeDetail() {
@@ -280,6 +288,7 @@ function openIssueModal() {
   document.getElementById('issue-desc').value = '';
   document.getElementById('issue-status').value = 'todo';
   document.getElementById('issue-priority').value = '3';
+  document.getElementById('issue-due-date').value = '';
   document.getElementById('issue-modal').classList.remove('hidden');
   setTimeout(() => document.getElementById('issue-title').focus(), 50);
 }
@@ -301,6 +310,7 @@ async function saveNewIssue() {
       priority: Number(document.getElementById('issue-priority').value),
       project_id: document.getElementById('issue-project').value || null,
       assignee: document.getElementById('issue-assignee').value || null,
+      due_date: document.getElementById('issue-due-date').value || undefined,
     }),
   });
 
@@ -373,6 +383,10 @@ document.getElementById('detail-desc').addEventListener('blur', async e => {
     const issue = issues.find(i => i.id === currentIssueId);
     if (issue && val !== issue.description) await saveDetailField('description', val);
   }
+});
+
+document.getElementById('detail-due-date').addEventListener('change', async e => {
+  await saveDetailField('due_date', e.target.value || '');
 });
 
 ['detail-status','detail-priority','detail-assignee','detail-project'].forEach(id => {
