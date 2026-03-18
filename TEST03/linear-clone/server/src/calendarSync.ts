@@ -33,7 +33,7 @@ export async function createCalendarEvent(issue: Issue): Promise<string | null> 
   try {
     const res = await fetch(CALENDAR_API, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(body),
     });
     const event = await res.json();
@@ -55,7 +55,7 @@ export async function updateCalendarEvent(issue: Issue): Promise<void> {
   try {
     await fetch(`${CALENDAR_API}/${issue.calendar_event_id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(body),
     });
   } catch {}

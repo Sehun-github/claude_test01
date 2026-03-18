@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>캘린더</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 할일 모달 -->
+  <div id="todo-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="todo-modal-title">할일 추가</h3>
+        <button class="modal-close" id="todo-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="todo-id" />
+        <div class="form-group">
+          <label>제목 *</label>
+          <input type="text" id="todo-title" placeholder="할일 제목" />
+        </div>
+        <div class="form-group">
+          <label>설명</label>
+          <textarea id="todo-description" placeholder="설명 (선택)"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>우선순위</label>
+            <select id="todo-priority">
+              <option value="low">낮음</option>
+              <option value="medium" selected>보통</option>
+              <option value="high">높음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>마감일</label>
+            <input type="date" id="todo-due-date" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="todo-btn-delete" class="btn btn-danger hidden">삭제</button>
+        <div class="modal-footer-right">
+          <button id="todo-btn-cancel" class="btn btn-secondary">취소</button>
+          <button id="todo-btn-save" class="btn btn-primary">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 일정 모달 -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">일정 추가</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="event-id" />
+        <div class="form-group">
+          <label>제목 *</label>
+          <input type="text" id="event-title" placeholder="일정 제목" />
+        </div>
+        <div class="form-group">
+          <label>설명</label>
+          <textarea id="event-description" placeholder="일정 설명 (선택)"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>시작일시 *</label>
+            <input type="datetime-local" id="event-start" />
+          </div>
+          <div class="form-group">
+            <label>종료일시 *</label>
+            <input type="datetime-local" id="event-end" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>색상</label>
+          <div class="color-picker">
+            <div class="color-option selected" data-color="#4A90D9" style="background:#4A90D9"></div>
+            <div class="color-option" data-color="#E74C3C" style="background:#E74C3C"></div>
+            <div class="color-option" data-color="#2ECC71" style="background:#2ECC71"></div>
+            <div class="color-option" data-color="#F39C12" style="background:#F39C12"></div>
+            <div class="color-option" data-color="#9B59B6" style="background:#9B59B6"></div>
+            <div class="color-option" data-color="#1ABC9C" style="background:#1ABC9C"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-delete" class="btn btn-danger hidden">삭제</button>
+        <div class="modal-footer-right">
+          <button id="btn-cancel" class="btn btn-secondary">취소</button>
+          <button id="btn-save" class="btn btn-primary">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 레이아웃 -->
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo">📅 캘린더</div>
+      <div class="share-info" id="share-info" style="display:none">
+        <div class="share-label">팀 접속 주소</div>
+        <div class="share-url" id="share-url"></div>
+      </div>
+      <div class="sync-status" id="sync-status">● 연결 중...</div>
+      <button class="btn btn-primary btn-new" id="btn-new-event">+ 새 일정</button>
+      <div class="mini-calendar" id="mini-calendar"></div>
+      <div class="upcoming">
+        <h4>다가오는 일정</h4>
+        <div id="upcoming-list"></div>
+      </div>
+
+      <div class="todo-section">
+        <div class="todo-section-header">
+          <h4>할일</h4>
+          <button class="todo-add-btn" id="btn-new-todo">+</button>
+        </div>
+        <div class="todo-filters">
+          <button class="todo-filter active" data-filter="all">전체</button>
+          <button class="todo-filter" data-filter="active">진행중</button>
+          <button class="todo-filter" data-filter="done">완료</button>
+        </div>
+        <div id="todo-list"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="calendar-header">
+        <div class="calendar-nav">
+          <button id="btn-prev">‹</button>
+          <h2 id="current-month"></h2>
+          <button id="btn-next">›</button>
+        </div>
+        <div class="view-buttons">
+          <button class="view-btn active" data-view="month">월별</button>
+          <button class="view-btn" data-view="week">주별</button>
+          <button class="btn btn-secondary" id="btn-today">오늘</button>
+        </div>
+      </div>
+
+      <div class="calendar-grid" id="calendar-grid">
+        <div class="day-labels">
+          <span>일</span><span>월</span><span>화</span>
+          <span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="days" id="days-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
