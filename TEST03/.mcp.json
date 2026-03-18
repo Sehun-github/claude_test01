@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "calendar": {
+      "command": "node",
+      "args": ["C:/Users/student/Documents/claude_test/TEST03/calendar-mcp/dist/index.js"]
+    },
+    "todo": {
+      "command": "node",
+      "args": ["C:/Users/student/Documents/claude_test/TEST03/todo-mcp/dist/index.js"]
+    },
+    "linear": {
+      "command": "node",
+      "args": ["C:/Users/student/Documents/claude_test/TEST03/linear-clone/mcp/dist/index.js"]
+    }
+  }
+}
