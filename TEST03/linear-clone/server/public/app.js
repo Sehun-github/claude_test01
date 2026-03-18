@@ -465,6 +465,21 @@ function connectSSE() {
   };
 }
 
+// ─── 테마 토글 ───────────────────────────────────────────
+function applyTheme(isLight) {
+  document.body.classList.toggle('light', isLight);
+  document.getElementById('theme-toggle').textContent = isLight ? '🌙' : '☀️';
+}
+
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const isLight = !document.body.classList.contains('light');
+  applyTheme(isLight);
+  localStorage.setItem('linear-theme', isLight ? 'light' : 'dark');
+});
+
 // ─── 초기 실행 ────────────────────────────────────────────
+const savedTheme = localStorage.getItem('linear-theme');
+if (savedTheme === 'light') applyTheme(true);
+
 loadAll().then(render);
 connectSSE();

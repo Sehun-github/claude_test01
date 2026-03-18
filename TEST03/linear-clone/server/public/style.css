@@ -16,7 +16,28 @@
   --green: #30a46c;
   --yellow: #f5a623;
   --orange: #f97316;
+  --modal-shadow: 0 25px 60px rgba(0,0,0,0.5);
 }
+
+/* ── 라이트 모드 ── */
+body.light {
+  --bg: #ffffff;
+  --bg2: #f7f7f8;
+  --bg3: #eeeeef;
+  --bg4: #e4e4e6;
+  --border: #e2e2e4;
+  --border2: #d0d0d4;
+  --text: #1a1a1a;
+  --text2: #4e4e60;
+  --text3: #9090a0;
+  --accent: #5e6ad2;
+  --accent-hover: #4a56c0;
+  --danger: #d93025;
+  --modal-shadow: 0 25px 60px rgba(0,0,0,0.15);
+}
+body.light .modal-overlay { background: rgba(0,0,0,0.3); }
+body.light .modal { border-color: var(--border2); }
+body.light ::-webkit-scrollbar-thumb { background: var(--border2); }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -408,18 +429,42 @@ body {
 
 /* ── 버튼 ── */
 .btn {
-  padding: 7px 14px;
+  padding: 7px 16px;
   border: none;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.4;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-hover); }
-.btn-ghost { background: none; color: var(--text2); border: 1px solid var(--border2); }
-.btn-ghost:hover { background: var(--bg3); color: var(--text); }
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(94,106,210,0.35);
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 6px rgba(94,106,210,0.45);
+}
+.btn-primary:active { transform: translateY(1px); box-shadow: none; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+}
+.btn-ghost:hover {
+  background: var(--bg4);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.btn-ghost:active { transform: translateY(1px); }
+
+/* 모달 푸터 버튼 간격 */
+.modal-footer-right { display: flex; gap: 8px; align-items: center; }
 
 .icon-btn {
   background: none;
@@ -452,7 +497,7 @@ body {
   border-radius: 12px;
   width: 580px;
   max-width: 95vw;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--modal-shadow);
   animation: fadeIn 0.15s ease;
 }
 
@@ -514,9 +559,9 @@ body {
   justify-content: space-between;
   padding: 10px 16px 14px;
   border-top: 1px solid var(--border);
+  gap: 12px;
 }
-.modal-footer-left { display: flex; gap: 6px; }
-.modal-footer-right { display: flex; gap: 6px; }
+.modal-footer-left { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; min-width: 0; }
 
 .prop-select {
   background: var(--bg3);
@@ -666,6 +711,34 @@ body {
 }
 .empty-state-icon { font-size: 40px; }
 .empty-state-text { font-size: 14px; }
+
+/* ── 테마 토글 ── */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text3);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+
+/* ── 트랜지션 (테마 전환 부드럽게) ── */
+body, .sidebar, .main, .modal, .detail-panel, .board-card,
+.issue-row, .nav-item, .prop-row, .search-input, .filter-select {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
 
 /* ── 스크롤바 ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
