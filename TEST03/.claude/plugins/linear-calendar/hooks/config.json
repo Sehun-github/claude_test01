@@ -1,0 +1,56 @@
+{
+  "description": "linear-calendar 플러그인 훅 설정",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__linear__create_issue",
+        "description": "이슈 생성 후 — 마감일 충돌 간단 체크",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ 이슈가 생성되었습니다. 마감일 충돌 확인: /overdue-check 또는 conflict-detector 에이전트를 실행하세요.'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__calendar__create_event",
+        "description": "캘린더 이벤트 생성 후 — 알림",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📅 캘린더 일정이 추가되었습니다.'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__linear__delete_issue",
+        "description": "이슈 삭제 전 — 연동된 캘린더 이벤트 안내",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  이슈 삭제 시 연동된 캘린더 이벤트도 함께 삭제됩니다.'"
+          }
+        ]
+      }
+    ]
+  },
+
+  "settings_json_snippet": {
+    "설명": "아래 내용을 settings.json의 hooks 항목에 추가하면 실제로 동작합니다",
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "mcp__linear__create_issue",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "echo '✅ 이슈 생성됨 — conflict-detector 에이전트로 마감일 충돌을 확인하세요'"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

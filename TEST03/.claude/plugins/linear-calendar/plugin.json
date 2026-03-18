@@ -1,0 +1,19 @@
+{
+  "name": "linear-calendar",
+  "version": "1.0.0",
+  "description": "Linear Clone + 캘린더 통합 플러그인 — Skills, Agents, Hooks 포함",
+  "author": "claude_test",
+  "mcpDependencies": ["calendar", "todo", "linear"],
+  "skills": [
+    "daily-standup",
+    "weekly-plan",
+    "sprint-create",
+    "overdue-check",
+    "meeting-prep"
+  ],
+  "agents": [
+    "pm-agent",
+    "conflict-detector"
+  ],
+  "hooks": "hooks/config.json"
+}

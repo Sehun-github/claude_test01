@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__linear__create_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ 이슈 생성됨 — /overdue-check 또는 conflict-detector 에이전트로 마감일 충돌을 확인하세요'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__calendar__create_event",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📅 캘린더 일정이 추가되었습니다'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "mcp__linear__delete_issue",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  이슈 삭제 시 연동된 캘린더 이벤트도 함께 삭제됩니다'"
+          }
+        ]
+      }
+    ]
+  }
+}
